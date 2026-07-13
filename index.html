@@ -37,17 +37,26 @@
                 <h3 class="text-blue-800 font-bold text-sm uppercase tracking-wider"><i class="fa-solid fa-cart-plus mr-1"></i> Tambah Item Barang</h3>
                 
                 <div>
+                    <label class="block text-gray-600 text-xs font-medium mb-1">Cari Nama / Kode Barang (Mendukung Wildcard %)</label>
+                    <div class="relative">
+                        <input type="text" id="searchItem" oninput="filterProducts()" placeholder="Contoh: Aice% atau %Slush atau Kode" class="w-full p-2.5 pl-9 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm text-gray-700">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-sm">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-0.5">Ketik kata kunci. Gunakan % di akhir/awal kata untuk memotong pencarian.</p>
+                </div>
+
+                <div>
                     <label class="block text-gray-600 text-xs font-medium mb-1">Pilih Produk</label>
                     <select id="itemName" class="w-full p-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm text-gray-700">
                         <option value="" disabled selected>-- Sedang memuat produk dari database... --</option>
                     </select>
-                    <p class="text-[11px] text-gray-400 mt-0.5">Cari dan pilih barang yang ingin dipesan.</p>
                 </div>
 
                 <div>
                     <label class="block text-gray-600 text-xs font-medium mb-1">Jumlah Kuantitas (Qty)</label>
                     <input type="number" id="itemQty" min="1" placeholder="Contoh: 10" class="w-full p-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm text-gray-700">
-                    <p class="text-[11px] text-gray-400 mt-0.5">Masukkan total pesanan (Hanya boleh angka bulat, minimal 1).</p>
                 </div>
 
                 <button type="button" onclick="addToCart()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold transition duration-200">
@@ -76,7 +85,6 @@
                         </tbody>
                     </table>
                 </div>
-                <p class="text-xs text-gray-400 mt-1">Jika ada salah input, klik tombol merah <i class="fa-solid fa-trash text-red-500 mx-0.5"></i> untuk menghapus barang tersebut sebelum dikirim.</p>
             </div>
 
             <div class="pt-2">
@@ -90,11 +98,12 @@
 
     <script>
         let cart = [];
+        let allProducts = []; // Menampung data master barang asli
         
-        // ⚠️ TEMPELKAN URL BARU DARI GOOGLE APPS SCRIPT ANDA DI BAWAH INI:
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx87WGvYzmKwQvup3qYQbuwDKoHfHFNTzndO5bZ_dr-tvLIBGtOjkT-UStcfOjmfpFG/exec"; 
+        // ⚠️ TEMPELKAN URL RE-DEPLOYMENT BARU ANDA DI BAWAH INI:
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhPHgVtlymoy-IzxrE5CeRYPfgV7bwASy_aKuRtXqCimU4bkGk36IdZVgMY5xW9fJR/exec"; 
 
-        // AMBIL DATA BARANG DARI GOOGLE SHEETS SAAT HALAMAN DIBUKA
+        // AMBIL DATA BARANG & KODE SAAT HALAMAN DIBUKA
         document.addEventListener("DOMContentLoaded", function() {
             const itemSelect = document.getElementById('itemName');
             
@@ -102,15 +111,10 @@
             .then(response => response.json())
             .then(result => {
                 if (result.status === "success") {
-                    itemSelect.innerHTML = `<option value="" disabled selected>-- Pilih Nama Barang --</option>`;
-                    result.data.forEach(nama => {
-                        const option = document.createElement('option');
-                        option.value = nama;
-                        option.textContent = nama;
-                        itemSelect.appendChild(option);
-                    });
+                    allProducts = result.data; 
+                    renderProductOptions(allProducts);
                 } else {
-                    itemSelect.innerHTML = `<option value="" disabled selected>-- Gagal memuat produk dari Sheets --</option>`;
+                    itemSelect.innerHTML = `<option value="" disabled selected>-- Gagal memuat database --</option>`;
                 }
             })
             .catch(err => {
@@ -118,6 +122,56 @@
                 console.error(err);
             });
         });
+
+        // FUNGSI UNTUK MENAMPILKAN PRODUK KE DROPDOWN
+        function renderProductOptions(products) {
+            const itemSelect = document.getElementById('itemName');
+            itemSelect.innerHTML = '';
+            
+            if (products.length === 0) {
+                itemSelect.innerHTML = `<option value="" disabled selected>-- Barang tidak ditemukan --</option>`;
+                return;
+            }
+            
+            itemSelect.innerHTML = `<option value="" disabled selected>-- Pilih Nama Barang (${products.length} ditemukan) --</option>`;
+            products.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.nama;
+                // Menampilkan format: [Kode] Nama Barang agar staf tahu kodenya
+                option.textContent = p.kode ? `[${p.kode}] ${p.nama}` : p.nama;
+                itemSelect.appendChild(option);
+            });
+        }
+
+        // FUNGSI PENCARIAN WILDCARD REVOLUSIONER (%)
+        function filterProducts() {
+            const query = document.getElementById('searchItem').value.trim();
+            
+            if (!query) {
+                renderProductOptions(allProducts);
+                return;
+            }
+            
+            let regexRule = "";
+            if (query.includes('%')) {
+                // Jika user pakai wildcard %, ubah % menjadi .* ala regex SQL LIKE
+                let escaped = query.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+                regexRule = "^" + escaped.replace(/%/g, ".*") + "$";
+            } else {
+                // Jika tidak pakai %, otomatis anggap sebagai pencarian potong kata biasa (contains)
+                let escaped = query.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+                regexRule = ".*" + escaped + ".*";
+            }
+            
+            const regex = new RegExp(regexRule, "i"); // "i" artinya tidak sensitif huruf besar/kecil
+            
+            // Filter berdasarkan Nama BARANG atau KODE BARANG
+            const filtered = allProducts.filter(p => {
+                return regex.test(p.nama) || regex.test(p.kode);
+            });
+            
+            renderProductOptions(filtered);
+        }
 
         window.addEventListener('beforeunload', function (e) {
             if (cart.length > 0) {
@@ -129,7 +183,6 @@
         function renderCart() {
             const tbody = document.getElementById('cartTableBody');
             const storeSelect = document.getElementById('storeName');
-            const storeHelpText = document.getElementById('storeHelpText');
             
             tbody.innerHTML = '';
 
@@ -139,14 +192,10 @@
                         <td colspan="3" class="p-4 text-center text-gray-400 italic text-xs">Belum ada barang yang ditambahkan.</td>
                     </tr>`;
                 storeSelect.disabled = false; 
-                storeHelpText.innerHTML = "Silakan pilih lokasi toko tempat Anda bertugas hari ini.";
-                storeHelpText.className = "text-xs text-gray-400 mt-1";
                 return;
             }
 
             storeSelect.disabled = true; 
-            storeHelpText.innerHTML = "<i class='fa-solid fa-lock mr-1'></i> Toko terkunci. Hapus semua item di bawah jika ingin mengubah toko.";
-            storeHelpText.className = "text-xs text-amber-600 font-medium mt-1";
 
             cart.forEach((item, index) => {
                 const row = document.createElement('tr');
@@ -187,8 +236,11 @@
                 cart.push({ name: itemName, qty: itemQty });
             }
 
+            // Reset Form Tambah Item & kembalikan list produk ke semula
             itemSelect.selectedIndex = 0;
             qtyInput.value = '';
+            document.getElementById('searchItem').value = '';
+            renderProductOptions(allProducts); 
             renderCart();
         }
 
@@ -213,7 +265,7 @@
             btn.disabled = true;
             btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Mengirim Pesanan...`;
 
-            const payload = { toko: storeName, pesanan: cart };
+            const payload = { tensor: true, toko: storeName, pesanan: cart };
 
             fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
