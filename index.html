@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Pemesanan Barang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
+
+    <div class="max-w-2xl mx-auto px-4 py-8">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-t-2xl shadow-md text-center">
+            <h1 class="text-2xl font-bold tracking-wide"><i class="fa-solid fa-boxes-packing mr-2"></i>Form Pemesanan Barang</h1>
+            <p class="text-blue-100 text-sm mt-1">Ketik dan periksa kembali pesanan toko Anda sebelum dikirim.</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-b-2xl shadow-md space-y-6">
+            
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1 text-sm">
+                    <i class="fa-solid fa-store text-blue-500 mr-1"></i> Nama Toko / Outlet <span class="text-red-500">*</span>
+                </label>
+                <select id="storeName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50 font-medium text-gray-800 disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed">
+                    <option value="" disabled selected>-- Pilih Toko Anda --</option>
+                    <option value="Toko Jababeka">Toko Jababeka</option>
+                    <option value="Toko Pilar">Toko Pilar</option>
+                    <option value="Toko Mega Regency">Toko Mega Regency</option>
+                    <option value="Toko Lippo Cikarang">Toko Lippo Cikarang</option>
+                </select>
+                <p id="storeHelpText" class="text-xs text-gray-400 mt-1">Silakan pilih lokasi toko tempat Anda bertugas hari ini.</p>
+            </div>
+
+            <hr class="border-gray-200">
+
+            <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-4">
+                <h3 class="text-blue-800 font-bold text-sm uppercase tracking-wider"><i class="fa-solid fa-cart-plus mr-1"></i> Tambah Item Barang</h3>
+                
+                <div>
+                    <label class="block text-gray-600 text-xs font-medium mb-1">Pilih Produk</label>
+                    <select id="itemName" class="w-full p-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm text-gray-700">
+                        <option value="" disabled selected>-- Pilih Nama Barang --</option>
+                        <option value="Aice Mango Slush (300gr)">Aice Mango Slush (300gr)</option>
+                        <option value="Indomie Goreng Spesial">Indomie Goreng Spesial</option>
+                        <option value="Susu Ultra Milk Cokelat 250ml">Susu Ultra Milk Cokelat 250ml</option>
+                    </select>
+                    <p class="text-[11px] text-gray-400 mt-0.5">Cari dan pilih barang yang ingin dipesan.</p>
+                </div>
+
+                <div>
+                    <label class="block text-gray-600 text-xs font-medium mb-1">Jumlah Kuantitas (Qty)</label>
+                    <input type="number" id="itemQty" min="1" placeholder="Contoh: 10" class="w-full p-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm text-gray-700">
+                    <p class="text-[11px] text-gray-400 mt-0.5">Masukkan total pesanan (Hanya boleh angka bulat, minimal 1).</p>
+                </div>
+
+                <button type="button" onclick="addToCart()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold transition duration-200">
+                    <i class="fa-solid fa-plus mr-1"></i> Masukkan ke Daftar Pesanan
+                </button>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2 text-sm">
+                    <i class="fa-solid fa-list-check text-indigo-500 mr-1"></i> Daftar Pesanan Anda (Real-time)
+                </label>
+                
+                <div class="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                    <table class="w-full text-left text-sm text-gray-700">
+                        <thead class="bg-gray-200 text-gray-600 text-xs uppercase font-bold">
+                            <tr>
+                                <th class="p-3">Nama Barang</th>
+                                <th class="p-3 text-center w-20">Qty</th>
+                                <th class="p-3 text-center w-16">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartTableBody">
+                            <tr id="emptyRow">
+                                <td colspan="3" class="p-4 text-center text-gray-400 italic text-xs">Belum ada barang yang ditambahkan.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-xs text-gray-400 mt-1">Jika ada salah input, klik tombol merah <i class="fa-solid fa-trash text-red-500 mx-0.5"></i> untuk menghapus barang tersebut sebelum dikirim.</p>
+            </div>
+
+            <div class="pt-2">
+                <button id="btnSubmit" onclick="submitOrder()" class="w-full bg-green-600 hover:bg-green-700 text-white p-3.5 rounded-xl font-bold text-base shadow-lg transition duration-200 flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> Kirim Semua Pesanan Sekarang
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let cart = [];
+        
+        // GANTI INI: Masukkan URL Web App dari Google Apps Script Anda nanti di sini
+        const APPS_SCRIPT_URL = "PROSES_DENGAN_URL_ANDA"; 
+
+        // PROTEKSI 1: Cegah halaman tertutup/ter-refresh tidak sengaja jika keranjang ada isinya
+        window.addEventListener('beforeunload', function (e) {
+            if (cart.length > 0) {
+                e.preventDefault();
+                e.returnValue = 'Pesanan Anda belum dikirim. Data akan hilang jika Anda keluar!';
+            }
+        });
+
+        function renderCart() {
+            const tbody = document.getElementById('cartTableBody');
+            const storeSelect = document.getElementById('storeName');
+            const storeHelpText = document.getElementById('storeHelpText');
+            
+            tbody.innerHTML = '';
+
+            if (cart.length === 0) {
+                tbody.innerHTML = `
+                    <tr id="emptyRow">
+                        <td colspan="3" class="p-4 text-center text-gray-400 italic text-xs">Belum ada barang yang ditambahkan.</td>
+                    </tr>`;
+                
+                // Buka kembali gembok pilihan toko jika keranjang kosong
+                storeSelect.disabled = false; 
+                storeHelpText.innerHTML = "Silakan pilih lokasi toko tempat Anda bertugas hari ini.";
+                storeHelpText.className = "text-xs text-gray-400 mt-1";
+                return;
+            }
+
+            // PROTEKSI 2: Kunci dropdown toko agar tidak bisa diubah di tengah jalan saat menginput barang
+            storeSelect.disabled = true; 
+            storeHelpText.innerHTML = "<i class='fa-solid fa-lock mr-1'></i> Toko terkunci. Hapus semua item di bawah jika ingin mengubah toko.";
+            storeHelpText.className = "text-xs text-amber-600 font-medium mt-1";
+
+            cart.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.className = "border-b border-gray-200 bg-white hover:bg-gray-50 transition";
+                row.innerHTML = `
+                    <td class="p-3 font-medium text-gray-800">${item.name}</td>
+                    <td class="p-3 text-center font-bold text-blue-600">${item.qty}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700 p-1 transition transform hover:scale-110" title="Hapus Barang">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function addToCart() {
+            const itemSelect = document.getElementById('itemName');
+            const qtyInput = document.getElementById('itemQty');
+
+            const itemName = itemSelect.value;
+            
+            // PROTEKSI 3: Bersihkan input dari angka desimal, minus, atau karakter aneh (Huruf 'e')
+            const itemQty = Math.floor(Number(qtyInput.value)); 
+
+            if (!itemName) {
+                alert('Silakan pilih nama barang terlebih dahulu!');
+                return;
+            }
+            if (isNaN(itemQty) || itemQty <= 0) {
+                alert('Masukkan jumlah kuantitas yang valid (Angka bulat minimal 1)!');
+                return;
+            }
+
+            // Jika barang yang sama diinput lagi, otomatis jumlahnya ditambahkan (tidak membuat baris baru)
+            const existingIndex = cart.findIndex(item => item.name === itemName);
+            if (existingIndex > -1) {
+                cart[existingIndex].qty += itemQty;
+            } else {
+                cart.push({ name: itemName, qty: itemQty });
+            }
+
+            // Reset input barang & qty setelah berhasil masuk daftar
+            itemSelect.selectedIndex = 0;
+            qtyInput.value = '';
+            
+            renderCart();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCart();
+        }
+
+        function submitOrder() {
+            const storeName = document.getElementById('storeName').value;
+            
+            if (!storeName) {
+                alert('Maaf, Anda harus memilih Nama Toko terlebih dahulu di bagian atas!');
+                return;
+            }
+            if (cart.length === 0) {
+                alert('Daftar pesanan Anda masih kosong! Silakan tambah minimal 1 barang sebelum mengirim.');
+                return;
+            }
+
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Memproses & Mengirim Pesanan...`;
+
+            // Struktur data paket yang dikirim ke Google Sheets
+            const payload = {
+                toko: storeName,
+                pesanan: cart
+            };
+
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Bypass CORS policy Google
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                // PROTEKSI 4: Edukasi pengguna jika terjadi gangguan sinyal internet di lapangan
+                alert('Sistem telah memproses pengiriman data. Pastikan sinyal HP Anda aktif. Silakan cek berkala ke Stokis jika merasa jaringan sedang buruk.');
+                
+                // Reset total seluruh form setelah sukses kirim
+                cart = [];
+                document.getElementById('storeName').disabled = false;
+                document.getElementById('storeName').selectedIndex = 0;
+                renderCart();
+            })
+            .catch(err => {
+                alert('Gagal mengirim pesanan. Koneksi internet Anda bermasalah atau URL salah, silakan coba lagi.');
+                console.error(err);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Kirim Semua Pesanan Sekarang`;
+            });
+        }
+    </script>
+</body>
+</html>
