@@ -39,10 +39,7 @@
                 <div>
                     <label class="block text-gray-600 text-xs font-medium mb-1">Pilih Produk</label>
                     <select id="itemName" class="w-full p-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm text-gray-700">
-                        <option value="" disabled selected>-- Pilih Nama Barang --</option>
-                        <option value="Aice Mango Slush (300gr)">Aice Mango Slush (300gr)</option>
-                        <option value="Indomie Goreng Spesial">Indomie Goreng Spesial</option>
-                        <option value="Susu Ultra Milk Cokelat 250ml">Susu Ultra Milk Cokelat 250ml</option>
+                        <option value="" disabled selected>-- Sedang memuat produk dari database... --</option>
                     </select>
                     <p class="text-[11px] text-gray-400 mt-0.5">Cari dan pilih barang yang ingin dipesan.</p>
                 </div>
@@ -94,14 +91,38 @@
     <script>
         let cart = [];
         
-        // GANTI INI: Masukkan URL Web App dari Google Apps Script Anda nanti di sini
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxoD3o7G9ZKbxAifCeHLO9tbLEPnm7SWCyokHCVCUVGH_KhIt8EeG-NMNPDS63cH6BC/exec"; 
+        // ⚠️ TEMPELKAN URL BARU DARI GOOGLE APPS SCRIPT ANDA DI BAWAH INI:
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx87WGvYzmKwQvup3qYQbuwDKoHfHFNTzndO5bZ_dr-tvLIBGtOjkT-UStcfOjmfpFG/exec"; 
 
-        // PROTEKSI 1: Cegah halaman tertutup/ter-refresh tidak sengaja jika keranjang ada isinya
+        // AMBIL DATA BARANG DARI GOOGLE SHEETS SAAT HALAMAN DIBUKA
+        document.addEventListener("DOMContentLoaded", function() {
+            const itemSelect = document.getElementById('itemName');
+            
+            fetch(APPS_SCRIPT_URL)
+            .then(response => response.json())
+            .then(result => {
+                if (result.status === "success") {
+                    itemSelect.innerHTML = `<option value="" disabled selected>-- Pilih Nama Barang --</option>`;
+                    result.data.forEach(nama => {
+                        const option = document.createElement('option');
+                        option.value = nama;
+                        option.textContent = nama;
+                        itemSelect.appendChild(option);
+                    });
+                } else {
+                    itemSelect.innerHTML = `<option value="" disabled selected>-- Gagal memuat produk dari Sheets --</option>`;
+                }
+            })
+            .catch(err => {
+                itemSelect.innerHTML = `<option value="" disabled selected>-- Gagal memuat data (Cek Sinyal) --</option>`;
+                console.error(err);
+            });
+        });
+
         window.addEventListener('beforeunload', function (e) {
             if (cart.length > 0) {
                 e.preventDefault();
-                e.returnValue = 'Pesanan Anda belum dikirim. Data akan hilang jika Anda keluar!';
+                e.returnValue = 'Pesanan Anda belum dikirim!';
             }
         });
 
@@ -117,15 +138,12 @@
                     <tr id="emptyRow">
                         <td colspan="3" class="p-4 text-center text-gray-400 italic text-xs">Belum ada barang yang ditambahkan.</td>
                     </tr>`;
-                
-                // Buka kembali gembok pilihan toko jika keranjang kosong
                 storeSelect.disabled = false; 
                 storeHelpText.innerHTML = "Silakan pilih lokasi toko tempat Anda bertugas hari ini.";
                 storeHelpText.className = "text-xs text-gray-400 mt-1";
                 return;
             }
 
-            // PROTEKSI 2: Kunci dropdown toko agar tidak bisa diubah di tengah jalan saat menginput barang
             storeSelect.disabled = true; 
             storeHelpText.innerHTML = "<i class='fa-solid fa-lock mr-1'></i> Toko terkunci. Hapus semua item di bawah jika ingin mengubah toko.";
             storeHelpText.className = "text-xs text-amber-600 font-medium mt-1";
@@ -137,7 +155,7 @@
                     <td class="p-3 font-medium text-gray-800">${item.name}</td>
                     <td class="p-3 text-center font-bold text-blue-600">${item.qty}</td>
                     <td class="p-3 text-center">
-                        <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700 p-1 transition transform hover:scale-110" title="Hapus Barang">
+                        <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700 p-1 transition">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
@@ -151,20 +169,17 @@
             const qtyInput = document.getElementById('itemQty');
 
             const itemName = itemSelect.value;
-            
-            // PROTEKSI 3: Bersihkan input dari angka desimal, minus, atau karakter aneh (Huruf 'e')
             const itemQty = Math.floor(Number(qtyInput.value)); 
 
-            if (!itemName) {
+            if (!itemName || itemName.startsWith('--')) {
                 alert('Silakan pilih nama barang terlebih dahulu!');
                 return;
             }
             if (isNaN(itemQty) || itemQty <= 0) {
-                alert('Masukkan jumlah kuantitas yang valid (Angka bulat minimal 1)!');
+                alert('Masukkan jumlah kuantitas yang valid!');
                 return;
             }
 
-            // Jika barang yang sama diinput lagi, otomatis jumlahnya ditambahkan (tidak membuat baris baru)
             const existingIndex = cart.findIndex(item => item.name === itemName);
             if (existingIndex > -1) {
                 cart[existingIndex].qty += itemQty;
@@ -172,10 +187,8 @@
                 cart.push({ name: itemName, qty: itemQty });
             }
 
-            // Reset input barang & qty setelah berhasil masuk daftar
             itemSelect.selectedIndex = 0;
             qtyInput.value = '';
-            
             renderCart();
         }
 
@@ -188,42 +201,35 @@
             const storeName = document.getElementById('storeName').value;
             
             if (!storeName) {
-                alert('Maaf, Anda harus memilih Nama Toko terlebih dahulu di bagian atas!');
+                alert('Maaf, Anda harus memilih Nama Toko terlebih dahulu!');
                 return;
             }
             if (cart.length === 0) {
-                alert('Daftar pesanan Anda masih kosong! Silakan tambah minimal 1 barang sebelum mengirim.');
+                alert('Daftar pesanan Anda masih kosong!');
                 return;
             }
 
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Memproses & Mengirim Pesanan...`;
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Mengirim Pesanan...`;
 
-            // Struktur data paket yang dikirim ke Google Sheets
-            const payload = {
-                toko: storeName,
-                pesanan: cart
-            };
+            const payload = { toko: storeName, pesanan: cart };
 
             fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Bypass CORS policy Google
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
             .then(() => {
-                // PROTEKSI 4: Edukasi pengguna jika terjadi gangguan sinyal internet di lapangan
-                alert('Sistem telah memproses pengiriman data. Pastikan sinyal HP Anda aktif. Silakan cek berkala ke Stokis jika merasa jaringan sedang buruk.');
-                
-                // Reset total seluruh form setelah sukses kirim
+                alert('Pesanan sukses terkirim ke Google Sheets Admin!');
                 cart = [];
                 document.getElementById('storeName').disabled = false;
                 document.getElementById('storeName').selectedIndex = 0;
                 renderCart();
             })
             .catch(err => {
-                alert('Gagal mengirim pesanan. Koneksi internet Anda bermasalah atau URL salah, silakan coba lagi.');
+                alert('Gagal mengirim pesanan. Periksa internet Anda.');
                 console.error(err);
             })
             .finally(() => {
