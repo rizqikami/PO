@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Pemesanan Barang</title>
+    <title>Sistem Operasional Toko - PO & Penerimaan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -11,12 +11,20 @@
 
     <div class="max-w-2xl mx-auto px-4 py-8">
         <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-t-2xl shadow-md text-center">
-            <h1 class="text-2xl font-bold tracking-wide"><i class="fa-solid fa-boxes-packing mr-2"></i>Form Pemesanan Barang</h1>
-            <p class="text-blue-100 text-sm mt-1">Ketik dan periksa kembali pesanan toko Anda sebelum dikirim.</p>
+            <h1 class="text-2xl font-bold tracking-wide"><i class="fa-solid fa-boxes-packing mr-2"></i>Sistem Operasional Toko</h1>
+            <p class="text-blue-100 text-sm mt-1">Pemesanan Barang & Konfirmasi Penerimaan Stok Toko</p>
         </div>
 
-        <div id="mainForm" class="bg-white p-6 rounded-b-2xl shadow-md space-y-6">
-            
+        <div class="flex bg-white border-b border-gray-200 p-2 shadow-sm">
+            <button id="btnTabOrder" onclick="switchTab('order')" class="w-1/2 py-3 text-center text-sm font-bold border-b-4 border-blue-600 text-blue-600 transition duration-200">
+                <i class="fa-solid fa-cart-shopping mr-2"></i>1. Buat PO Baru
+            </button>
+            <button id="btnTabReceive" onclick="switchTab('receive')" class="w-1/2 py-3 text-center text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-blue-600 transition duration-200">
+                <i class="fa-solid fa-clipboard-check mr-2"></i>2. Terima Barang Toko
+            </button>
+        </div>
+
+        <div id="tabContentOrder" class="bg-white p-6 rounded-b-2xl shadow-md space-y-6 block">
             <div>
                 <label class="block text-gray-700 font-semibold mb-1 text-sm">
                     <i class="fa-solid fa-store text-blue-500 mr-1"></i> Nama Toko / Outlet <span class="text-red-500">*</span>
@@ -28,119 +36,138 @@
                     <option value="Toko Mega Regency">Toko Mega Regency</option>
                     <option value="Toko Lippo Cikarang">Toko Lippo Cikarang</option>
                 </select>
-                <p id="storeHelpText" class="text-xs text-gray-400 mt-1">Silakan pilih atau pastikan kembali lokasi toko Anda sebelum menekan tombol kirim.</p>
             </div>
 
             <hr class="border-gray-200">
 
             <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-4">
                 <h3 class="text-blue-800 font-bold text-sm uppercase tracking-wider"><i class="fa-solid fa-cart-plus mr-1"></i> Tambah Item Barang</h3>
-                
                 <div>
                     <label class="block text-gray-600 text-xs font-medium mb-1">Cari Nama / Kode Barang (Mendukung Wildcard %)</label>
                     <div class="relative">
-                        <input type="text" id="searchItem" oninput="filterProducts()" placeholder="Contoh: Aice% atau %Slush atau Kode" class="w-full p-2.5 pl-9 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm text-gray-700">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-sm">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                        </div>
+                        <input type="text" id="searchItem" oninput="filterProducts()" placeholder="Contoh: Aice% atau %Slush" class="w-full p-2.5 pl-9 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm text-gray-700">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-sm"><i class="fa-solid fa-magnifying-glass"></i></div>
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-0.5">Ketik kata kunci. Gunakan % di akhir/awal kata untuk memotong pencarian.</p>
                 </div>
-
                 <div>
                     <label class="block text-gray-600 text-xs font-medium mb-1">Pilih Produk</label>
                     <select id="itemName" class="w-full p-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm text-gray-700">
                         <option value="" disabled selected>-- Sedang memuat produk dari database... --</option>
                     </select>
                 </div>
-
                 <div>
                     <label class="block text-gray-600 text-xs font-medium mb-1">Jumlah Kuantitas (Qty)</label>
                     <input type="number" id="itemQty" min="1" placeholder="Contoh: 10" class="w-full p-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm text-gray-700">
                 </div>
-
-                <button type="button" onclick="addToCart()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold transition duration-200">
-                    <i class="fa-solid fa-plus mr-1"></i> Masukkan ke Daftar Pesanan
-                </button>
+                <button type="button" onclick="addToCart()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold transition duration-200"><i class="fa-solid fa-plus mr-1"></i> Masukkan ke Daftar Pesanan</button>
             </div>
 
             <div>
                 <div class="flex justify-between items-center mb-2">
-                    <label class="text-gray-700 font-semibold text-sm">
-                        <i class="fa-solid fa-list-check text-indigo-500 mr-1"></i> Daftar Pesanan Anda (Real-time)
-                    </label>
+                    <label class="text-gray-700 font-semibold text-sm"><i class="fa-solid fa-list-check text-indigo-500 mr-1"></i> Daftar Pesanan Anda (Real-time)</label>
                     <span id="cartCount" class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2.5 py-1 rounded-full"></span>
                 </div>
-                
                 <div class="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                     <table class="w-full text-left text-sm text-gray-700">
                         <thead class="bg-gray-200 text-gray-600 text-xs uppercase font-bold">
-                            <tr>
-                                <th class="p-3 text-center w-12">No.</th>
-                                <th class="p-3">Nama Barang</th>
-                                <th class="p-3 text-center w-20">Qty</th>
-                                <th class="p-3 text-center w-16">Aksi</th>
-                            </tr>
+                            <tr><th class="p-3 text-center w-12">No.</th><th class="p-3">Nama Barang</th><th class="p-3 text-center w-20">Qty</th><th class="p-3 text-center w-16">Aksi</th></tr>
                         </thead>
                         <tbody id="cartTableBody">
-                            <tr id="emptyRow">
-                                <td colspan="4" class="p-4 text-center text-gray-400 italic text-xs">Belum ada barang yang ditambahkan.</td>
-                            </tr>
+                            <tr id="emptyRow"><td colspan="4" class="p-4 text-center text-gray-400 italic text-xs">Belum ada barang yang ditambahkan.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="pt-2">
+                <button id="btnSubmit" onclick="submitOrder()" class="w-full bg-green-600 hover:bg-green-700 text-white p-3.5 rounded-xl font-bold text-base shadow-lg transition duration-200 flex justify-center items-center gap-2"><i class="fa-solid fa-paper-plane"></i> Kirim Semua Pesanan Sekarang</button>
+            </div>
+        </div>
+
+        <div id="tabContentReceive" class="bg-white p-6 rounded-b-2xl shadow-md space-y-6 hidden">
+            <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-amber-800 text-xs space-y-1">
+                <p class="font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Panduan & Fitur Koreksi:</p>
+                <p>Menampilkan semua kiriman 7 hari terakhir. Jika Anda **salah input sebelumnya**, cukup ganti angkanya di sini lalu klik Simpan kembali untuk memperbarui data di Google Sheets.</p>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1 text-sm"><i class="fa-solid fa-store text-amber-500 mr-1"></i> Nama Toko / Outlet Anda <span class="text-red-500">*</span></label>
+                <div class="flex gap-2">
+                    <select id="receiveStoreName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white font-medium text-gray-800 text-sm">
+                        <option value="" disabled selected>-- Pilih Toko Anda --</option>
+                        <option value="Toko Jababeka">Toko Jababeka</option>
+                        <option value="Toko Pilar">Toko Pilar</option>
+                        <option value="Toko Mega Regency">Toko Mega Regency</option>
+                        <option value="Toko Lippo Cikarang">Toko Lippo Cikarang</option>
+                    </select>
+                    <button type="button" onclick="checkIncomingGoods()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 rounded-lg text-sm font-bold whitespace-nowrap transition duration-200 flex items-center gap-1"><i class="fa-solid fa-magnifying-glass"></i> Cek Barang</button>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-semibold text-sm mb-2"><i class="fa-solid fa-truck-ramp-box text-blue-500 mr-1"></i> Checklist Jumlah Fisik Diterima</label>
+                <div class="border border-gray-200 rounded-lg overflow-x-auto bg-gray-50">
+                    <table class="w-full text-left text-sm text-gray-700 min-w-[500px]">
+                        <thead class="bg-gray-200 text-gray-600 text-xs uppercase font-bold">
+                            <tr><th class="p-3 text-center w-12">No.</th><th class="p-3">Detail Kiriman / Item Barang</th><th class="p-3 text-center w-20">Qty PO</th><th class="p-3 text-center w-32">Qty Diterima</th></tr>
+                        </thead>
+                        <tbody id="receiveTableBody">
+                            <tr><td colspan="4" class="p-4 text-center text-gray-400 italic text-xs">Silakan pilih toko dan tekan tombol "Cek Barang" di atas.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <div class="pt-2">
-                <button id="btnSubmit" onclick="submitOrder()" class="w-full bg-green-600 hover:bg-green-700 text-white p-3.5 rounded-xl font-bold text-base shadow-lg transition duration-200 flex justify-center items-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i> Kirim Semua Pesanan Sekarang
-                </button>
+                <button id="btnSubmitReceive" onclick="submitReceiptConfirmation()" disabled class="w-full bg-gray-400 text-white p-3.5 rounded-xl font-bold text-base shadow-lg cursor-not-allowed flex justify-center items-center gap-2 transition duration-200"><i class="fa-solid fa-circle-check"></i> Simpan Penerimaan Toko</button>
             </div>
-
         </div>
 
         <div id="successScreen" class="hidden bg-white p-6 rounded-b-2xl shadow-md space-y-6">
             <div class="text-center space-y-2 py-4">
-                <div class="text-green-500 text-6xl drop-shadow-sm">
-                    <i class="fa-solid fa-circle-check animate-bounce"></i>
-                </div>
+                <div class="text-green-500 text-6xl"><i class="fa-solid fa-circle-check animate-bounce"></i></div>
                 <h2 class="text-2xl font-black text-gray-800">Pesanan Berhasil Terkirim!</h2>
-                <p class="text-sm text-gray-500 leading-relaxed">Sistem telah berhasil menyimpan laporan pesanan Anda. Berikut rinciannya:</p>
+                <p class="text-sm text-gray-500">Sistem telah sukses mencatat pesanan Anda ke Google Sheets.</p>
             </div>
-
             <div class="bg-green-50/50 p-4 rounded-xl border border-green-100 text-sm space-y-2">
-                <div class="flex justify-between border-b border-green-100 pb-2">
-                    <span class="text-gray-500 font-medium"><i class="fa-solid fa-store text-green-600 mr-1.5"></i>Toko / Outlet:</span>
-                    <span id="successStore" class="font-bold text-gray-800"></span>
-                </div>
-                <div class="flex justify-between pt-1">
-                    <span class="text-gray-500 font-medium"><i class="fa-solid fa-clock text-green-600 mr-1.5"></i>Waktu Kirim:</span>
-                    <span id="successTime" class="font-bold text-gray-800 text-right"></span>
-                </div>
+                <div class="flex justify-between border-b border-green-100 pb-2"><span class="text-gray-500 font-medium">Toko / Outlet:</span><span id="successStore" class="font-bold text-gray-800"></span></div>
+                <div class="flex justify-between pt-1"><span class="text-gray-500 font-medium">Waktu Kirim:</span><span id="successTime" class="font-bold text-gray-800"></span></div>
             </div>
-
             <div>
                 <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Item Terkirim:</div>
                 <div class="border border-gray-200 rounded-lg overflow-hidden">
                     <table class="w-full text-left text-sm text-gray-700">
                         <thead class="bg-gray-50 text-gray-600 text-xs uppercase font-bold border-b border-gray-200">
-                            <tr>
-                                <th class="p-3 text-center w-12 bg-gray-100/50">No.</th>
-                                <th class="p-3">Nama Barang</th>
-                                <th class="p-3 text-center w-24 bg-gray-100/50">Qty</th>
-                            </tr>
+                            <tr><th class="p-3 text-center w-12 bg-gray-100/50">No.</th><th class="p-3">Nama Barang</th><th class="p-3 text-center w-24 bg-gray-100/50">Qty</th></tr>
                         </thead>
-                        <tbody id="successTableBody">
-                            </tbody>
+                        <tbody id="successTableBody"></tbody>
                     </table>
                 </div>
             </div>
+            <div class="pt-4"><button onclick="backToInputForm('order')" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-xl font-bold text-base shadow-lg transition duration-200"><i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Form Pemesanan</button></div>
+        </div>
 
-            <div class="pt-4">
-                <button onclick="backToInputForm()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-xl font-bold text-base shadow-lg transition duration-200 flex justify-center items-center gap-2">
-                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Halaman Input
-                </button>
+        <div id="successReceiveScreen" class="hidden bg-white p-6 rounded-b-2xl shadow-md space-y-6">
+            <div class="text-center space-y-2 py-4">
+                <div class="text-amber-500 text-6xl"><i class="fa-solid fa-square-check animate-pulse"></i></div>
+                <h2 class="text-2xl font-black text-gray-800">Konfirmasi Diterima Sukses!</h2>
+                <p class="text-sm text-gray-500">Kuantitas fisik barang masuk berhasil diperbarui di Google Sheets.</p>
             </div>
+            <div class="bg-amber-50/60 p-4 rounded-xl border border-amber-100 text-sm space-y-2">
+                <div class="flex justify-between border-b border-amber-100 pb-2"><span class="text-gray-500 font-medium">Toko Penerima:</span><span id="successRecStore" class="font-bold text-gray-800"></span></div>
+                <div class="flex justify-between pt-1"><span class="text-gray-500 font-medium">Waktu Update:</span><span id="successRecTime" class="font-bold text-gray-800"></span></div>
+            </div>
+            <div>
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Ringkasan Fisik yang Diterima:</div>
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <table class="w-full text-left text-sm text-gray-700">
+                        <thead class="bg-gray-50 text-gray-600 text-xs uppercase font-bold border-b border-gray-200">
+                            <tr><th class="p-3 text-center w-12">No.</th><th class="p-3">Nama Barang</th><th class="p-3 text-center w-24">Qty Diterima</th></tr>
+                        </thead>
+                        <tbody id="successRecTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="pt-4"><button onclick="backToInputForm('receive')" class="w-full bg-amber-500 hover:bg-amber-600 text-white p-3.5 rounded-xl font-bold text-base shadow-lg transition duration-200"><i class="fa-solid fa-rotate-left mr-1"></i> Kembali ke Menu Penerimaan</button></div>
         </div>
 
     </div>
@@ -149,20 +176,39 @@
         let cart = [];
         let allProducts = []; 
         
-        // ⚠️ TETAP GUNAKAN URL GOOGLE APPS SCRIPT ANDA YANG SEBELUMNYA DI SINI:
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhPHgVtlymoy-IzxrE5CeRYPfgV7bwASy_aKuRtXqCimU4bkGk36IdZVgMY5xW9fJR/exec"; 
+        // ⚠️ MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI:
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1suDlN-BIXehcZNU-Nuh9bjgFhcdq7e7TwdHUiM_jJIeEetDxh9THFY2pFBGpY8V4/exec"; 
 
-        // AMBIL DATA BARANG & KODE SAAT HALAMAN DIBUKA
+        function switchTab(tabName) {
+            const tabOrder = document.getElementById('tabContentOrder');
+            const tabReceive = document.getElementById('tabContentReceive');
+            const btnOrder = document.getElementById('btnTabOrder');
+            const btnReceive = document.getElementById('btnTabReceive');
+            document.getElementById('successScreen').classList.add('hidden');
+            document.getElementById('successReceiveScreen').classList.add('hidden');
+
+            if (tabName === 'order') {
+                tabOrder.classList.remove('hidden');
+                tabReceive.classList.add('hidden');
+                btnOrder.className = "w-1/2 py-3 text-center text-sm font-bold border-b-4 border-blue-600 text-blue-600 transition";
+                btnReceive.className = "w-1/2 py-3 text-center text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-blue-600 transition";
+            } else if (tabName === 'receive') {
+                tabOrder.classList.add('hidden');
+                tabReceive.classList.remove('hidden');
+                btnOrder.className = "w-1/2 py-3 text-center text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-blue-600 transition";
+                btnReceive.className = "w-1/2 py-3 text-center text-sm font-bold border-b-4 border-amber-500 text-amber-500 transition";
+            }
+        }
+
+        // AMBIL DATABASE MASTER BARANG
         document.addEventListener("DOMContentLoaded", function() {
             const itemSelect = document.getElementById('itemName');
-            
             fetch(APPS_SCRIPT_URL)
             .then(response => response.json())
             .then(result => {
                 if (result.status === "success") {
                     allProducts = result.data; 
                     renderProductOptions(allProducts);
-                    // 🛡️ BACA CADANGAN DARI MEMORI HP JIKA ADA
                     loadDataFromStorage();
                 } else {
                     itemSelect.innerHTML = `<option value="" disabled selected>-- Gagal memuat database --</option>`;
@@ -170,19 +216,16 @@
             })
             .catch(err => {
                 itemSelect.innerHTML = `<option value="" disabled selected>-- Gagal memuat data (Cek Sinyal) --</option>`;
-                console.error(err);
             });
         });
 
         function renderProductOptions(products) {
             const itemSelect = document.getElementById('itemName');
             itemSelect.innerHTML = '';
-            
             if (products.length === 0) {
                 itemSelect.innerHTML = `<option value="" disabled selected>-- Barang tidak ditemukan --</option>`;
                 return;
             }
-            
             itemSelect.innerHTML = `<option value="" disabled selected>-- Pilih Nama Barang (${products.length} ditemukan) --</option>`;
             products.forEach(p => {
                 const option = document.createElement('option');
@@ -194,79 +237,34 @@
 
         function filterProducts() {
             const query = document.getElementById('searchItem').value.trim();
-            
-            if (!query) {
-                renderProductOptions(allProducts);
-                return;
-            }
-            
-            let regexRule = "";
-            if (query.includes('%')) {
-                let escaped = query.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
-                regexRule = "^" + escaped.replace(/%/g, ".*") + "$";
-            } else {
-                let escaped = query.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
-                regexRule = ".*" + escaped + ".*";
-            }
-            
+            if (!query) { renderProductOptions(allProducts); return; }
+            let regexRule = query.includes('%') ? "^" + query.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/%/g, ".*") + "$" : ".*" + query.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1") + ".*";
             const regex = new RegExp(regexRule, "i"); 
-            
-            const filtered = allProducts.filter(p => {
-                return regex.test(p.nama) || regex.test(p.kode);
-            });
-            
+            const filtered = allProducts.filter(p => regex.test(p.nama) || regex.test(p.kode));
             renderProductOptions(filtered);
         }
 
-        window.addEventListener('beforeunload', function (e) {
-            if (cart.length > 0) {
-                e.preventDefault();
-                e.returnValue = 'Pesanan Anda belum dikirim!';
-            }
-        });
-
-        // 🛡️ LOGIKA BARU: Menyimpan keranjang & toko terpilih ke memori HP (LocalStorage)
         function saveDataToStorage() {
             localStorage.setItem('temp_cart', JSON.stringify(cart));
             localStorage.setItem('temp_store', document.getElementById('storeName').value);
         }
 
-        // 🛡️ LOGIKA BARU: Membaca cadangan dari memori HP saat halaman dimuat
         function loadDataFromStorage() {
             const savedCart = localStorage.getItem('temp_cart');
             const savedStore = localStorage.getItem('temp_store');
-
-            if (savedCart) {
-                cart = JSON.parse(savedCart);
-                renderCart();
-            }
-            if (savedStore) {
-                document.getElementById('storeName').value = savedStore;
-            }
-        }
-
-        // 🛡️ LOGIKA BARU: Menghapus cadangan setelah pesanan sukses terkirim
-        function clearDataStorage() {
-            localStorage.removeItem('temp_cart');
-            localStorage.removeItem('temp_store');
+            if (savedCart) { cart = JSON.parse(savedCart); renderCart(); }
+            if (savedStore) { document.getElementById('storeName').value = savedStore; }
         }
 
         function renderCart() {
             const tbody = document.getElementById('cartTableBody');
             const cartCount = document.getElementById('cartCount');
             tbody.innerHTML = '';
-
             if (cart.length === 0) {
-                tbody.innerHTML = `
-                    <tr id="emptyRow">
-                        <td colspan="4" class="p-4 text-center text-gray-400 italic text-xs">Belum ada barang yang ditambahkan.</td>
-                    </tr>`;
-                cartCount.textContent = ''; 
-                return;
+                tbody.innerHTML = `<tr id="emptyRow"><td colspan="4" class="p-4 text-center text-gray-400 italic text-xs">Belum ada barang yang ditambahkan.</td></tr>`;
+                cartCount.textContent = ''; return;
             }
-
             cartCount.textContent = `${cart.length} Item`;
-
             cart.forEach((item, index) => {
                 const row = document.createElement('tr');
                 row.className = "border-b border-gray-200 bg-white hover:bg-gray-50 transition";
@@ -274,12 +272,7 @@
                     <td class="p-3 text-center text-gray-500 font-bold">${index + 1}</td>
                     <td class="p-3 font-medium text-gray-800">${item.name}</td>
                     <td class="p-3 text-center font-bold text-blue-600">${item.qty}</td>
-                    <td class="p-3 text-center">
-                        <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700 p-1 transition">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                `;
+                    <td class="p-3 text-center"><button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash"></i></button></td>`;
                 tbody.appendChild(row);
             });
         }
@@ -287,139 +280,157 @@
         function addToCart() {
             const itemSelect = document.getElementById('itemName');
             const qtyInput = document.getElementById('itemQty');
-
             const itemName = itemSelect.value;
             const itemQty = Math.floor(Number(qtyInput.value)); 
-
-            if (!itemName || itemName.startsWith('--')) {
-                alert('Silakan pilih nama barang terlebih dahulu!');
-                return;
-            }
-            if (isNaN(itemQty) || itemQty <= 0) {
-                alert('Masukkan jumlah kuantitas yang valid!');
-                return;
-            }
-
+            if (!itemName || itemName.startsWith('--')) { alert('Silakan pilih nama barang!'); return; }
+            if (isNaN(itemQty) || itemQty <= 0) { alert('Masukkan jumlah kuantitas yang valid!'); return; }
             const existingIndex = cart.findIndex(item => item.name === itemName);
-            if (existingIndex > -1) {
-                cart[existingIndex].qty += itemQty;
-            } else {
-                cart.push({ name: itemName, qty: itemQty });
-            }
-
-            itemSelect.selectedIndex = 0;
-            qtyInput.value = '';
-            document.getElementById('searchItem').value = '';
-            renderProductOptions(allProducts); 
-            renderCart();
-            
-            // 🛡️ Simpan perubahan ke memori HP
-            saveDataToStorage();
+            if (existingIndex > -1) { cart[existingIndex].qty += itemQty; } else { cart.push({ name: itemName, qty: itemQty }); }
+            itemSelect.selectedIndex = 0; qtyInput.value = ''; document.getElementById('searchItem').value = '';
+            renderProductOptions(allProducts); renderCart(); saveDataToStorage();
         }
 
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            renderCart();
-            
-            // 🛡️ Simpan perubahan ke memori HP
-            saveDataToStorage();
-        }
+        function removeFromCart(index) { cart.splice(index, 1); renderCart(); saveDataToStorage(); }
 
-        // FUNGSI UNTUK MENAMPILKAN LAYAR STRUK SUKSES
-        function showSuccessScreen(store, submittedCart) {
-            // Sembunyikan Form Utama, Tampilkan Layar Sukses
-            document.getElementById('mainForm').classList.add('hidden');
-            document.getElementById('successScreen').classList.remove('hidden');
-
-            // Set Data Toko & Waktu
-            document.getElementById('successStore').textContent = store;
-            
-            const now = new Date();
-            const formattedTime = now.toLocaleDateString('id-ID', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            }) + ' - ' + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
-            document.getElementById('successTime').textContent = formattedTime;
-
-            // Render daftar item yang sukses terkirim ke dalam tabel struk
-            const successTbody = document.getElementById('successTableBody');
-            successTbody.innerHTML = '';
-
-            submittedCart.forEach((item, index) => {
-                const row = document.createElement('tr');
-                row.className = "border-b border-gray-100 bg-white hover:bg-green-50/20 transition";
-                row.innerHTML = `
-                    <td class="p-3 text-center text-gray-400 font-bold bg-gray-50/50">${index + 1}</td>
-                    <td class="p-3 font-semibold text-gray-800">${item.name}</td>
-                    <td class="p-3 text-center font-bold text-green-600">${item.qty} Pcs</td>
-                `;
-                successTbody.appendChild(row);
-            });
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // FUNGSI UNTUK KEMBALI KE HALAMAN INPUT UTAMA
-        function backToInputForm() {
-            // Sembunyikan layar sukses, tampilkan form input lagi
+        function backToInputForm(tabTarget) {
             document.getElementById('successScreen').classList.add('hidden');
-            document.getElementById('mainForm').classList.remove('hidden');
-
-            // Reset input form agar bersih
-            document.getElementById('searchItem').value = '';
-            document.getElementById('itemQty').value = '';
-            document.getElementById('itemName').selectedIndex = 0;
-            renderProductOptions(allProducts);
-            
+            document.getElementById('successReceiveScreen').classList.add('hidden');
+            if (tabTarget === 'order') {
+                document.getElementById('tabContentOrder').classList.remove('hidden');
+            } else {
+                document.getElementById('tabContentReceive').classList.remove('hidden');
+                checkIncomingGoods(); // Segarkan daftar terima barang
+            }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function submitOrder() {
             const storeName = document.getElementById('storeName').value;
-            
-            if (!storeName) {
-                alert('Maaf, Anda harus memilih Nama Toko terlebih dahulu sebelum mengirim!');
-                return;
-            }
-            if (cart.length === 0) {
-                alert('Daftar pesanan Anda masih kosong!');
-                return;
-            }
-
+            if (!storeName) { alert('Pilih Nama Toko terlebih dahulu!'); return; }
+            if (cart.length === 0) { alert('Daftar pesanan kosong!'); return; }
             const btn = document.getElementById('btnSubmit');
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Mengirim Pesanan...`;
+            btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Mengirim...`;
+            fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ toko: storeName, pesanan: cart }) })
+            .then(() => {
+                document.getElementById('tabContentOrder').classList.add('hidden');
+                document.getElementById('successScreen').classList.remove('hidden');
+                document.getElementById('successStore').textContent = storeName;
+                document.getElementById('successTime').textContent = new Date().toLocaleString('id-ID') + ' WIB';
+                const sTbody = document.getElementById('successTableBody'); sTbody.innerHTML = '';
+                cart.forEach((item, index) => {
+                    sTbody.innerHTML += `<tr><td class="p-3 text-center text-gray-400 font-bold">${index+1}</td><td class="p-3 font-semibold text-gray-800">${item.name}</td><td class="p-3 text-center font-bold text-green-600">${item.qty} Pcs</td></tr>`;
+                });
+                localStorage.removeItem('temp_cart'); cart = []; renderCart();
+            })
+            .catch(err => { alert('Gagal mengirim pesanan.'); })
+            .finally(() => { btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Kirim Semua Pesanan Sekarang`; });
+        }
 
-            const payload = { toko: storeName, pesanan: cart };
+        // ==================== 🔄 TAB 2: LOGIKA PENERIMAAN & EDIT ULANG ====================
+        
+        function checkIncomingGoods() {
+            const store = document.getElementById('receiveStoreName').value;
+            if (!store) { alert('Silakan pilih Nama Toko Anda!'); return; }
+
+            const tbody = document.getElementById('receiveTableBody');
+            const btnSubmitReceive = document.getElementById('btnSubmitReceive');
+            
+            tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500 font-medium"><i class="fa-solid fa-spinner animate-spin text-amber-500 mr-2"></i>Membaca data kiriman 7 hari terakhir...</td></tr>`;
+            btnSubmitReceive.disabled = true;
+            btnSubmitReceive.className = "w-full bg-gray-400 text-white p-3.5 rounded-xl font-bold text-base shadow-lg cursor-not-allowed flex justify-center items-center gap-2";
+
+            fetch(`${APPS_SCRIPT_URL}?action=getReceiptData&toko=${encodeURIComponent(store)}`)
+            .then(response => response.json())
+            .then(result => {
+                tbody.innerHTML = '';
+                if (result.status === "success" && result.data.length > 0) {
+                    result.data.forEach((item, index) => {
+                        const row = document.createElement('tr');
+                        row.className = "border-b border-gray-200 bg-white hover:bg-amber-50/10 transition text-xs sm:text-sm";
+                        
+                        // Cek status apakah ini input baru atau perbaikan data lama
+                        const sudahAdaData = (item.qtyDiterimaToko !== "" && item.qtyDiterimaToko !== undefined);
+                        const nilaiAwalBox = sudahAdaData ? item.qtyDiterimaToko : item.qtyPO;
+                        
+                        const badgeStatus = sudahAdaData 
+                            ? `<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded shadow-sm border border-green-200"><i class="fa-solid fa-check-double"></i> Dikonfirmasi: ${item.qtyDiterimaToko}</span>`
+                            : `<span class="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded shadow-sm border border-amber-200"><i class="fa-solid fa-clock"></i> Belum Diterima</span>`;
+
+                        row.innerHTML = `
+                            <td class="p-3 text-center text-gray-500 font-bold">${index + 1}</td>
+                            <td class="p-3">
+                                <div class="text-[10px] text-gray-400 font-mono">${item.tanggal}</div>
+                                <div class="font-semibold text-gray-800 flex items-center flex-wrap">${item.nama} ${badgeStatus}</div>
+                                <div class="text-[10px] text-gray-400 font-mono">Kode: ${item.kode || '-'}</div>
+                            </td>
+                            <td class="p-3 text-center font-bold text-gray-500 bg-gray-100/50">${item.qtyPO}</td>
+                            <td class="p-3 text-center">
+                                <input type="number" data-row="${item.rowNum}" data-name="${item.nama}" min="0" value="${nilaiAwalBox}" class="receipt-qty-input w-20 p-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none font-bold text-amber-600 bg-amber-50/30">
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                    
+                    btnSubmitReceive.disabled = false;
+                    btnSubmitReceive.className = "w-full bg-amber-500 hover:bg-amber-600 text-white p-3.5 rounded-xl font-bold text-base shadow-lg cursor-pointer flex justify-center items-center gap-2 transition duration-200";
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400 italic text-xs">Tidak ada riwayat pengiriman barang dalam 7 hari terakhir untuk toko ini.</td></tr>`;
+                }
+            })
+            .catch(err => {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500 italic text-xs">Gagal memuat paket kiriman. Cek jaringan!</td></tr>`;
+            });
+        }
+
+        function submitReceiptConfirmation() {
+            const inputs = document.querySelectorAll('.receipt-qty-input');
+            if (inputs.length === 0) return;
+
+            const confirmationData = [];
+            const summaryArray = [];
+            let isValid = true;
+
+            inputs.forEach(input => {
+                const rowNum = input.getAttribute('data-row');
+                const itemName = input.getAttribute('data-name');
+                const qtyVal = input.value.trim();
+
+                if (qtyVal === "" || isNaN(qtyVal) || Number(qtyVal) < 0) {
+                    isValid = false;
+                } else {
+                    confirmationData.push({ rowNum: Number(rowNum), qtyDiterima: Number(qtyVal) });
+                    summaryArray.push({ name: itemName, qty: qtyVal });
+                }
+            });
+
+            if (!isValid) { alert('Kuantitas fisik tidak boleh kosong atau bernilai negatif!'); return; }
+            if (!confirm('Apakah data kuantitas barang masuk ini sudah dipastikan benar?')) return;
+
+            const btn = document.getElementById('btnSubmitReceive');
+            const store = document.getElementById('receiveStoreName').value;
+            btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Memperbarui Data...`;
 
             fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ action: "submitReceipt", data: confirmationData })
             })
             .then(() => {
-                // Tampilkan ringkasan sukses
-                showSuccessScreen(storeName, [...cart]);
+                // ✨ SEKARANG MENAMPILKAN SCREEN STRUK SUKSES PENERIMAAN BUKAN HANYA ALERT BROWSER
+                document.getElementById('tabContentReceive').classList.add('hidden');
+                document.getElementById('successReceiveScreen').classList.remove('hidden');
+                document.getElementById('successRecStore').textContent = store;
+                document.getElementById('successRecTime').textContent = new Date().toLocaleString('id-ID') + ' WIB';
                 
-                // 🛡️ Bersihkan memori HP karena data sudah aman masuk database pusat
-                clearDataStorage();
-                
-                // Baru setelah itu reset variabel lokal
-                cart = [];
-                document.getElementById('storeName').selectedIndex = 0;
-                renderCart();
+                const recTbody = document.getElementById('successRecTableBody');
+                recTbody.innerHTML = '';
+                summaryArray.forEach((item, index) => {
+                    recTbody.innerHTML += `<tr><td class="p-3 text-center text-gray-400 font-bold">${index+1}</td><td class="p-3 font-semibold text-gray-800">${item.name}</td><td class="p-3 text-center font-bold text-amber-600">${item.qty} Pcs</td></tr>`;
+                });
             })
-            .catch(err => {
-                alert('Gagal mengirim pesanan. Periksa internet Anda.');
-                console.error(err);
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Kirim Semua Pesanan Sekarang`;
-            });
+            .catch(err => { alert('Koneksi terputus saat menyimpan konfirmasi.'); })
+            .finally(() => { btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Simpan Penerimaan Toko`; });
         }
     </script>
 </body>
