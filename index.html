@@ -85,8 +85,8 @@
 
         <div id="tabContentReceive" class="bg-white p-6 rounded-b-2xl shadow-md space-y-6 hidden">
             <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-amber-800 text-xs space-y-1">
-                <p class="font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Panduan Kelompok Tanggal:</p>
-                <p>Data di bawah ini otomatis **dikelompokkan per tanggal pembuatan PO**. PO terbaru berada di paling atas agar staf Anda tidak kehilangan orientasi dokumen.</p>
+                <p class="font-bold"><i class="fa-solid fa-shield-halved mr-1"></i> Sistem Proteksi Konkurensi Aktif:</p>
+                <p>Data dikelompokkan per dokumen PO. Gunakan tombol **Simpan PO** khusus di bawah masing-masing tabel untuk melakukan update agar tidak mengganggu data historis PO lainnya.</p>
             </div>
 
             <div>
@@ -103,22 +103,8 @@
                 </div>
             </div>
 
-            <div>
-                <label class="block text-gray-700 font-semibold text-sm mb-2"><i class="fa-solid fa-truck-ramp-box text-blue-500 mr-1"></i> Checklist Jumlah Fisik Diterima</label>
-                <div class="border border-gray-200 rounded-lg overflow-x-auto bg-gray-50">
-                    <table class="w-full text-left text-sm text-gray-700 min-w-[500px]">
-                        <thead class="bg-gray-200 text-gray-600 text-xs uppercase font-bold">
-                            <tr><th class="p-3 text-center w-12">No.</th><th class="p-3">Detail Item Barang</th><th class="p-3 text-center w-20">Qty PO</th><th class="p-3 text-center w-32">Qty Diterima</th></tr>
-                        </thead>
-                        <tbody id="receiveTableBody">
-                            <tr><td colspan="4" class="p-4 text-center text-gray-400 italic text-xs">Silakan pilih toko dan tekan tombol "Cek Barang" di atas.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="pt-2">
-                <button id="btnSubmitReceive" onclick="submitReceiptConfirmation()" disabled class="w-full bg-gray-400 text-white p-3.5 rounded-xl font-bold text-base shadow-lg cursor-not-allowed flex justify-center items-center gap-2 transition duration-200"><i class="fa-solid fa-circle-check"></i> Simpan Penerimaan Toko</button>
+            <div id="receiveGroupsContainer" class="space-y-8">
+                <div class="text-center text-gray-400 italic text-xs py-8 border border-dashed border-gray-200 rounded-xl bg-gray-50">Silakan pilih toko dan tekan tombol "Cek Barang" di atas.</div>
             </div>
         </div>
 
@@ -177,7 +163,7 @@
         let allProducts = []; 
         
         // ⚠️ MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI:
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1suDlN-BIXehcZNU-Nuh9bjgFhcdq7e7TwdHUiM_jJIeEetDxh9THFY2pFBGpY8V4/exec"; 
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXaHOYHWQAlt3Bm2Ts-t4zO0LLwmXM9XpSlvQdbU-6-G2ATiO7SdWnUnhfXjy-M3FU/exec"; 
 
         function switchTab(tabName) {
             const tabOrder = document.getElementById('tabContentOrder');
@@ -200,7 +186,6 @@
             }
         }
 
-        // AMBIL DATABASE MASTER BARANG
         document.addEventListener("DOMContentLoaded", function() {
             const itemSelect = document.getElementById('itemName');
             fetch(APPS_SCRIPT_URL)
@@ -310,109 +295,123 @@
             if (cart.length === 0) { alert('Daftar pesanan kosong!'); return; }
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Mengirim...`;
-            fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ toko: storeName, pesanan: cart }) })
-            .then(() => {
-                document.getElementById('tabContentOrder').classList.add('hidden');
-                document.getElementById('successScreen').classList.remove('hidden');
-                document.getElementById('successStore').textContent = storeName;
-                document.getElementById('successTime').textContent = new Date().toLocaleString('id-ID') + ' WIB';
-                const sTbody = document.getElementById('successTableBody'); sTbody.innerHTML = '';
-                cart.forEach((item, index) => {
-                    sTbody.innerHTML += `<tr><td class="p-3 text-center text-gray-400 font-bold">${index+1}</td><td class="p-3 font-semibold text-gray-800">${item.name}</td><td class="p-3 text-center font-bold text-green-600">${item.qty} Pcs</td></tr>`;
-                });
-                localStorage.removeItem('temp_cart'); cart = []; renderCart();
+            
+            fetch(APPS_SCRIPT_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'text/plain' }, 
+                body: JSON.stringify({ toko: storeName, pesanan: cart }) 
             })
-            .catch(err => { alert('Gagal mengirim pesanan.'); })
+            .then(res => res.json())
+            .then((result) => {
+                if(result.status === "success") {
+                    document.getElementById('tabContentOrder').classList.add('hidden');
+                    document.getElementById('successScreen').classList.remove('hidden');
+                    document.getElementById('successStore').textContent = storeName;
+                    document.getElementById('successTime').textContent = new Date().toLocaleString('id-ID') + ' WIB';
+                    const sTbody = document.getElementById('successTableBody'); sTbody.innerHTML = '';
+                    cart.forEach((item, index) => {
+                        sTbody.innerHTML += `<tr><td class="p-3 text-center text-gray-400 font-bold">${index+1}</td><td class="p-3 font-semibold text-gray-800">${item.name}</td><td class="p-3 text-center font-bold text-green-600">${item.qty} Pcs</td></tr>`;
+                    });
+                    localStorage.removeItem('temp_cart'); cart = []; renderCart();
+                } else {
+                    alert("Gagal mengirim PO: " + result.message);
+                }
+            })
+            .catch(err => { alert('Gagal terhubung ke server. Periksa jaringan internet Anda.'); })
             .finally(() => { btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Kirim Semua Pesanan Sekarang`; });
         }
 
-        // ==================== 🔄 TAB 2: LOGIKA PENERIMAAN BERBASIS GRUP TANGGAL PO ====================
+        // ==================== 🔄 TAB 2: MEKANISME BARU GRUP MANDIRI PER DOKUMEN PO ====================
         
         function checkIncomingGoods() {
             const store = document.getElementById('receiveStoreName').value;
             if (!store) { alert('Silakan pilih Nama Toko Anda!'); return; }
 
-            const tbody = document.getElementById('receiveTableBody');
-            const btnSubmitReceive = document.getElementById('btnSubmitReceive');
-            
-            tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500 font-medium"><i class="fa-solid fa-spinner animate-spin text-amber-500 mr-2"></i>Membaca & mengelompokkan data kiriman 30 hari terakhir...</td></tr>`;
-            btnSubmitReceive.disabled = true;
-            btnSubmitReceive.className = "w-full bg-gray-400 text-white p-3.5 rounded-xl font-bold text-base shadow-lg cursor-not-allowed flex justify-center items-center gap-2";
+            const container = document.getElementById('receiveGroupsContainer');
+            container.innerHTML = `<div class="text-center text-gray-500 font-medium py-8"><i class="fa-solid fa-spinner animate-spin text-amber-500 mr-2"></i>Memuat & mengamankan data 30 hari terakhir...</div>`;
 
             fetch(`${APPS_SCRIPT_URL}?action=getReceiptData&toko=${encodeURIComponent(store)}`)
             .then(response => response.json())
             .then(result => {
-                tbody.innerHTML = '';
+                container.innerHTML = '';
                 if (result.status === "success" && result.data.length > 0) {
                     
-                    // ✨ PROSES LOGIKA BARU: Kelompokkan array data berdasarkan Tanggal PO
+                    // Kelompokkan data berdasarkan Tanggal PO
                     const groupedData = {};
                     result.data.forEach(item => {
-                        if (!groupedData[item.tanggal]) {
-                            groupedData[item.tanggal] = [];
-                        }
+                        if (!groupedData[item.tanggal]) { groupedData[item.tanggal] = []; }
                         groupedData[item.tanggal].push(item);
                     });
 
-                    // Ambil daftar tanggal unik yang sudah urut dari yang terbaru
                     const orderDates = Object.keys(groupedData);
 
-                    // Looping per Kelompok Tanggal
-                    orderDates.forEach(dateGroup => {
-                        
-                        // 1. Buat Baris Pembatas / Header Kelompok PO
-                        const headerRow = document.createElement('tr');
-                        headerRow.className = "bg-indigo-900 text-white font-bold tracking-wide border-t-4 border-indigo-950";
-                        headerRow.innerHTML = `
-                            <td colspan="4" class="p-2.5 text-xs sm:text-sm uppercase">
-                                <i class="fa-solid fa-receipt text-indigo-300 mr-2"></i> KELOMPOK PO TANGGAL: <span class="text-yellow-300">${dateGroup} WIB</span>
-                            </td>
-                        `;
-                        tbody.appendChild(headerRow);
-
-                        // 2. Tampilkan item-item di dalam kelompok tersebut (Urut sesuai input awal)
-                        // Karena di server di-reverse, di sini kita reverse balik khusus untuk internal grup agar urutan item tetap 1, 2, 3
+                    orderDates.forEach((dateGroup, gIndex) => {
+                        // Membuat ID unik yang aman untuk CSS Selector berdasarkan string tanggal
+                        const safeDateId = "group_" + dateGroup.replace(/[^a-zA-Z0-9]/g, "_") + "_" + gIndex;
                         const itemsInGroup = groupedData[dateGroup].reverse();
+
+                        // ✨ Render bentuk CARD MANDIRI untuk masing-masing Dokumen PO
+                        const cardDiv = document.createElement('div');
+                        cardDiv.id = safeDateId;
+                        cardDiv.className = "bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden space-y-3 pb-4 bg-gray-50/30";
                         
+                        let tableRowsHtml = '';
                         itemsInGroup.forEach((item, localIndex) => {
-                            const row = document.createElement('tr');
-                            row.className = "border-b border-gray-200 bg-white hover:bg-amber-50/20 transition text-xs sm:text-sm";
-                            
                             const sudahAdaData = (item.qtyDiterimaToko !== "" && item.qtyDiterimaToko !== undefined);
                             const nilaiAwalBox = sudahAdaData ? item.qtyDiterimaToko : item.qtyPO;
                             
                             const badgeStatus = sudahAdaData 
-                                ? `<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded shadow-sm border border-green-200"><i class="fa-solid fa-check-double"></i> Dikonfirmasi: ${item.qtyDiterimaToko}</span>`
-                                : `<span class="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded shadow-sm border border-amber-200"><i class="fa-solid fa-clock"></i> Belum Diterima</span>`;
+                                ? `<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded border border-green-200"><i class="fa-solid fa-check-double"></i> Dikonfirmasi: ${item.qtyDiterimaToko}</span>`
+                                : `<span class="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded border border-amber-200"><i class="fa-solid fa-clock"></i> Belum Diterima</span>`;
 
-                            row.innerHTML = `
-                                <td class="p-3 text-center text-gray-400 font-bold bg-gray-50/50">${localIndex + 1}</td>
-                                <td class="p-3">
-                                    <div class="font-semibold text-gray-800 flex items-center flex-wrap">${item.nama} ${badgeStatus}</div>
-                                    <div class="text-[10px] text-gray-400 font-mono">Kode: ${item.kode || '-'}</div>
-                                </td>
-                                <td class="p-3 text-center font-bold text-gray-600 bg-gray-100/30">${item.qtyPO}</td>
-                                <td class="p-3 text-center">
-                                    <input type="number" data-row="${item.rowNum}" data-name="${item.nama}" min="0" value="${nilaiAwalBox}" class="receipt-qty-input w-20 p-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none font-bold text-amber-600 bg-amber-50/30">
-                                </td>
+                            tableRowsHtml += `
+                                <tr class="border-b border-gray-200 bg-white text-xs sm:text-sm">
+                                    <td class="p-3 text-center text-gray-400 font-bold">${localIndex + 1}</td>
+                                    <td class="p-3">
+                                        <div class="font-semibold text-gray-800">${item.nama} ${badgeStatus}</div>
+                                        <div class="text-[10px] text-gray-400 font-mono">Kode: ${item.kode || '-'}</div>
+                                    </td>
+                                    <td class="p-3 text-center font-bold text-gray-500 bg-gray-50">${item.qtyPO}</td>
+                                    <td class="p-3 text-center">
+                                        <input type="number" data-row="${item.rowNum}" data-name="${item.nama}" min="0" value="${nilaiAwalBox}" class="receipt-input-${safeDateId} w-20 p-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none font-bold text-amber-600 bg-amber-50/20">
+                                    </td>
+                                </tr>
                             `;
-                            tbody.appendChild(row);
                         });
+
+                        cardDiv.innerHTML = `
+                            <div class="bg-indigo-900 text-white font-bold p-3 text-xs sm:text-sm uppercase flex justify-between items-center tracking-wide">
+                                <span><i class="fa-solid fa-receipt text-indigo-300 mr-2"></i> PO: ${dateGroup} WIB</span>
+                                <span class="bg-indigo-800 px-2 py-0.5 rounded text-[10px] border border-indigo-700">${itemsInGroup.length} Item</span>
+                            </div>
+                            <div class="px-3 overflow-x-auto">
+                                <table class="w-full text-left border border-gray-200 rounded-lg overflow-hidden min-w-[480px]">
+                                    <thead class="bg-gray-100 text-gray-600 text-[11px] uppercase font-bold border-b border-gray-200">
+                                        <tr><th class="p-2 text-center w-12">No</th><th class="p-2">Detail Barang</th><th class="p-2 text-center w-20">Qty PO</th><th class="p-2 text-center w-28">Fisik Datang</th></tr>
+                                    </thead>
+                                    <tbody>${tableRowsHtml}</tbody>
+                                </table>
+                            </div>
+                            <div class="px-3 pt-2">
+                                <button id="btnSubmit-${safeDateId}" onclick="submitSingleGroupReceipt('${safeDateId}', '${dateGroup}')" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow transition flex justify-center items-center gap-1">
+                                    <i class="fa-solid fa-circle-check"></i> Simpan Penerimaan PO Tanggal Ini saja
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(cardDiv);
                     });
-                    
-                    btnSubmitReceive.disabled = false;
-                    btnSubmitReceive.className = "w-full bg-amber-500 hover:bg-amber-600 text-white p-3.5 rounded-xl font-bold text-base shadow-lg cursor-pointer flex justify-center items-center gap-2 transition duration-200";
                 } else {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400 italic text-xs">Tidak ada riwayat pengiriman barang dalam 30 hari terakhir untuk toko ini.</td></tr>`;
+                    container.innerHTML = `<div class="text-center text-gray-400 italic text-xs py-8">Tidak ada riwayat pengiriman barang dalam 30 hari terakhir untuk toko ini.</div>`;
                 }
             })
             .catch(err => {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500 italic text-xs">Gagal memuat paket kiriman. Cek jaringan!</td></tr>`;
+                container.innerHTML = `<div class="text-center text-red-500 italic text-xs py-8">Gagal memuat kiriman. Periksa koneksi internet Anda!</div>`;
             });
         }
 
-        function submitReceiptConfirmation() {
-            const inputs = document.querySelectorAll('.receipt-qty-input');
+        // ✨ PROSES BARU: HANYA MENGIRIM DATA DARI SATU KELOMPOK PO TANGGAL TERTENTU
+        function submitSingleGroupReceipt(safeDateId, dateGroupLabel) {
+            const inputs = document.querySelectorAll(`.receipt-input-${safeDateId}`);
             if (inputs.length === 0) return;
 
             const confirmationData = [];
@@ -427,38 +426,52 @@
                 if (qtyVal === "" || isNaN(qtyVal) || Number(qtyVal) < 0) {
                     isValid = false;
                 } else {
-                    confirmationData.push({ rowNum: Number(rowNum), qtyDiterima: Number(qtyVal) });
+                    confirmationData.push({ rowNum: Number(rowNum), nama: itemName, qtyDiterima: Number(qtyVal) });
                     summaryArray.push({ name: itemName, qty: qtyVal });
                 }
             });
 
             if (!isValid) { alert('Kuantitas fisik tidak boleh kosong atau bernilai negatif!'); return; }
-            if (!confirm('Apakah data kuantitas barang masuk ini sudah dipastikan benar?')) return;
+            if (!confirm(`Apakah Anda yakin kuantitas fisik untuk PO tanggal ${dateGroupLabel} sudah dihitung dengan benar?`)) return;
 
-            const btn = document.getElementById('btnSubmitReceive');
+            const btn = document.getElementById(`btnSubmit-${safeDateId}`);
             const store = document.getElementById('receiveStoreName').value;
-            btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Memperbarui Data...`;
+            
+            btn.disabled = true; 
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Memperbarui Server...`;
 
+            // ✨ HAPUS BINDSPOT: Kirim tanpa no-cors, dengan text/plain agar status sukses terbaca penuh
             fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: "submitReceipt", data: confirmationData })
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ action: "submitReceipt", toko: store, data: confirmationData })
             })
-            .then(() => {
-                document.getElementById('tabContentReceive').classList.add('hidden');
-                document.getElementById('successReceiveScreen').classList.remove('hidden');
-                document.getElementById('successRecStore').textContent = store;
-                document.getElementById('successRecTime').textContent = new Date().toLocaleString('id-ID') + ' WIB';
-                
-                const recTbody = document.getElementById('successRecTableBody');
-                recTbody.innerHTML = '';
-                summaryArray.forEach((item, index) => {
-                    recTbody.innerHTML += `<tr><td class="p-3 text-center text-gray-400 font-bold">${index+1}</td><td class="p-3 font-semibold text-gray-800">${item.name}</td><td class="p-3 text-center font-bold text-amber-600">${item.qty} Pcs</td></tr>`;
-                });
+            .then(response => response.json())
+            .then(result => {
+                if (result.status === "success") {
+                    document.getElementById('tabContentReceive').classList.add('hidden');
+                    document.getElementById('successReceiveScreen').classList.remove('hidden');
+                    document.getElementById('successRecStore').textContent = store;
+                    document.getElementById('successRecTime').textContent = new Date().toLocaleString('id-ID') + ' WIB';
+                    
+                    const recTbody = document.getElementById('successRecTableBody');
+                    recTbody.innerHTML = '';
+                    summaryArray.forEach((item, index) => {
+                        recTbody.innerHTML += `<tr><td class="p-3 text-center text-gray-400 font-bold">${index+1}</td><td class="p-3 font-semibold text-gray-800">${item.name}</td><td class="p-3 text-center font-bold text-amber-600">${item.qty} Pcs</td></tr>`;
+                    });
+                } else {
+                    // Jika terjadi konflik pergeseran baris oleh admin pusat, error ditangkap di sini
+                    alert("⚠️ KOREKSI DI TOLAK SERVER:\n\n" + result.message);
+                    checkIncomingGoods(); // Paksa muat ulang halaman untuk mengambil posisi baris terbaru
+                }
             })
-            .catch(err => { alert('Koneksi terputus saat menyimpan konfirmasi.'); })
-            .finally(() => { btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Simpan Penerimaan Toko`; });
+            .catch(err => { 
+                alert('Koneksi internet terputus atau server tidak merespon. Data gagal disimpan!'); 
+            })
+            .finally(() => { 
+                btn.disabled = false; 
+                btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Simpan Penerimaan PO Tanggal Ini saja`; 
+            });
         }
     </script>
 </body>
