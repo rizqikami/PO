@@ -7,471 +7,282 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen font-sans">
+<body class="bg-slate-100 font-sans antialiased text-slate-800 min-h-screen pb-12">
 
-    <div class="max-w-2xl mx-auto px-4 py-8">
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-t-2xl shadow-md text-center">
-            <h1 class="text-2xl font-bold tracking-wide"><i class="fa-solid fa-boxes-packing mr-2"></i>Sistem Operasional Toko</h1>
-            <p class="text-blue-100 text-sm mt-1">Pemesanan Barang & Konfirmasi Penerimaan Stok Toko</p>
+    <div class="max-w-4xl mx-auto px-4 mt-6">
+        
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white text-center p-6 rounded-t-2xl shadow-lg">
+            <div class="flex justify-center items-center gap-3 text-3xl font-extrabold mb-1">
+                <i class="fa-solid fa-boxes-packing"></i>
+                <h1>Sistem Operasional Toko</h1>
+            </div>
+            <p class="text-blue-100 text-sm tracking-wide">Pemesanan Barang & Konfirmasi Penerimaan Stok Toko</p>
         </div>
 
-        <div class="flex bg-white border-b border-gray-200 p-2 shadow-sm">
-            <button id="btnTabOrder" onclick="switchTab('order')" class="w-1/2 py-3 text-center text-sm font-bold border-b-4 border-blue-600 text-blue-600 transition duration-200">
-                <i class="fa-solid fa-cart-shopping mr-2"></i>1. Buat PO Baru
+        <div class="bg-white flex border-b border-slate-200 shadow-sm font-medium">
+            <button onclick="switchTab('buat-po')" id="btn-tab-po" class="flex-1 py-4 text-center inline-flex justify-center items-center gap-2 hover:bg-slate-50 transition border-b-2 border-transparent text-slate-500">
+                <i class="fa-solid fa-shopping-cart"></i> 1. Buat PO Baru
             </button>
-            <button id="btnTabReceive" onclick="switchTab('receive')" class="w-1/2 py-3 text-center text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-blue-600 transition duration-200">
-                <i class="fa-solid fa-clipboard-check mr-2"></i>2. Terima Barang Toko
+            <button onclick="switchTab('terima-barang')" id="btn-tab-terima" class="flex-1 py-4 text-center inline-flex justify-center items-center gap-2 hover:bg-slate-50 transition border-b-2 border-amber-500 text-amber-600 font-bold bg-amber-50/40">
+                <i class="fa-solid fa-clipboard-check"></i> 2. Terima Barang Toko
             </button>
         </div>
 
-        <div id="tabContentOrder" class="bg-white p-6 rounded-b-2xl shadow-md space-y-6 block">
-            <div>
-                <label class="block text-gray-700 font-semibold mb-1 text-sm">
-                    <i class="fa-solid fa-store text-blue-500 mr-1"></i> Nama Toko / Outlet <span class="text-red-500">*</span>
-                </label>
-                <select id="storeName" onchange="saveDataToStorage()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white font-medium text-gray-800">
-                    <option value="" disabled selected>-- Pilih Toko Anda --</option>
-                    <option value="Toko Jababeka">Toko Jababeka</option>
-                    <option value="Toko Pilar">Toko Pilar</option>
-                    <option value="Toko Mega Regency">Toko Mega Regency</option>
-                    <option value="Toko Lippo Cikarang">Toko Lippo Cikarang</option>
-                </select>
+        <div class="bg-white p-6 rounded-b-2xl shadow-md">
+            
+            <div id="konten-buat-po" class="hidden animate-fadeIn">
+                <div class="text-center py-12 text-slate-400">
+                    <i class="fa-solid fa-basket-shopping text-5xl mb-3 text-slate-300"></i>
+                    <p class="font-medium">Formulir Pembuatan PO Baru</p>
+                    <p class="text-xs text-slate-400 mt-1">Fitur ini dapat diintegrasikan dengan form input pesanan supplier Anda.</p>
+                </div>
             </div>
 
-            <hr class="border-gray-200">
-
-            <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-4">
-                <h3 class="text-blue-800 font-bold text-sm uppercase tracking-wider"><i class="fa-solid fa-cart-plus mr-1"></i> Tambah Item Barang</h3>
-                <div>
-                    <label class="block text-gray-600 text-xs font-medium mb-1">Cari Nama / Kode Barang (Mendukung Wildcard %)</label>
-                    <div class="relative">
-                        <input type="text" id="searchItem" oninput="filterProducts()" placeholder="Contoh: Aice% atau %Slush" class="w-full p-2.5 pl-9 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm text-gray-700">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-sm"><i class="fa-solid fa-magnifying-glass"></i></div>
+            <div id="konten-terima-barang" class="block">
+                
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900 flex items-start gap-3 shadow-sm mb-6">
+                    <i class="fa-solid fa-circle-info mt-0.5 text-amber-600 text-base flex-shrink-0"></i>
+                    <div>
+                        <span class="font-bold text-amber-950 block mb-1 text-sm"><i class="fa-solid fa-map-signs mr-1"></i> PANDUAN PENERIMAAN BARANG TOKO:</span>
+                        <ul class="list-disc list-inside space-y-1 text-xs md:text-sm text-amber-900">
+                            <li>Pilih <strong>Nama Toko / Outlet</strong> Anda, lalu klik tombol <strong class="text-amber-700">Cek Barang</strong> untuk memuat data.</li>
+                            <li>Sistem akan mengelompokkan barang berdasarkan <strong>Waktu Dokumen PO</strong> yang dikirim dari pusat.</li>
+                            <li>Hitung fisik produk yang datang di toko, lalu isi jumlah aktualnya pada kolom <strong>Fisik Datang</strong>.</li>
+                            <li>Setelah selesai memeriksa satu dokumen PO, klik tombol <strong>Simpan Penerimaan PO</strong> di bawah tabel dokumen tersebut untuk mengirim laporan ke pusat.</li>
+                        </ul>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-gray-600 text-xs font-medium mb-1">Pilih Produk</label>
-                    <select id="itemName" class="w-full p-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm text-gray-700">
-                        <option value="" disabled selected>-- Sedang memuat produk dari database... --</option>
-                    </select>
+
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                        Nama Toko / Outlet Anda <span class="text-red-500">*</span>
+                    </label>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <select id="select-toko" class="flex-1 bg-white border border-slate-300 text-slate-800 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm text-sm">
+                            <option value="">-- Pilih Outlet / Cabang Toko --</option>
+                            <option value="Toko Mega Regency">Toko Mega Regency</option>
+                            <option value="Toko Lippo Cikarang">Toko Lippo Cikarang</option>
+                            <option value="Toko Jababeka">Toko Jababeka</option>
+                            <option value="Toko Pilar">Toko Pilar</option>
+                        </select>
+                        <button onclick="muatDataPO()" id="btn-cek" class="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-bold py-2.5 px-5 rounded-lg shadow inline-flex items-center justify-center gap-2 transition text-sm flex-shrink-0">
+                            <i class="fa-solid fa-magnifying-glass"></i> Cek Barang
+                        </button>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-gray-600 text-xs font-medium mb-1">Jumlah Kuantitas (Qty)</label>
-                    <input type="number" id="itemQty" min="1" placeholder="Contoh: 10" class="w-full p-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm text-gray-700">
+
+                <div id="status-loading" class="hidden text-center py-8 text-slate-500">
+                    <i class="fa-solid fa-spinner fa-spin text-3xl mb-2 text-blue-600"></i>
+                    <p class="text-sm font-medium">Sedang mengambil data PO dari server pusat...</p>
                 </div>
-                <button type="button" onclick="addToCart()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold transition duration-200"><i class="fa-solid fa-plus mr-1"></i> Masukkan ke Daftar Pesanan</button>
+
+                <div id="container-po-cards" class="space-y-6">
+                    <div class="text-center py-12 text-slate-400 border border-dashed border-slate-200 rounded-xl bg-slate-200/20">
+                        <i class="fa-solid fa-store text-4xl mb-2 text-slate-300"></i>
+                        <p class="text-sm">Silakan pilih Toko Anda dan klik tombol Cek Barang terlebih dahulu.</p>
+                    </div>
+                </div>
+
             </div>
 
-            <div>
-                <div class="flex justify-between items-center mb-2">
-                    <label class="text-gray-700 font-semibold text-sm"><i class="fa-solid fa-list-check text-indigo-500 mr-1"></i> Daftar Pesanan Anda (Real-time)</label>
-                    <span id="cartCount" class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2.5 py-1 rounded-full"></span>
-                </div>
-                <div class="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-                    <table class="w-full text-left text-sm text-gray-700">
-                        <thead class="bg-gray-200 text-gray-600 text-xs uppercase font-bold">
-                            <tr><th class="p-3 text-center w-12">No.</th><th class="p-3">Nama Barang</th><th class="p-3 text-center w-20">Qty</th><th class="p-3 text-center w-16">Aksi</th></tr>
-                        </thead>
-                        <tbody id="cartTableBody">
-                            <tr id="emptyRow"><td colspan="4" class="p-4 text-center text-gray-400 italic text-xs">Belum ada barang yang ditambahkan.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="pt-2">
-                <button id="btnSubmit" onclick="submitOrder()" class="w-full bg-green-600 hover:bg-green-700 text-white p-3.5 rounded-xl font-bold text-base shadow-lg transition duration-200 flex justify-center items-center gap-2"><i class="fa-solid fa-paper-plane"></i> Kirim Semua Pesanan Sekarang</button>
-            </div>
         </div>
-
-        <div id="tabContentReceive" class="bg-white p-6 rounded-b-2xl shadow-md space-y-6 hidden">
-            <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-amber-800 text-xs space-y-1">
-                <p class="font-bold"><i class="fa-solid fa-shield-halved mr-1"></i> Sistem Proteksi Konkurensi Aktif:</p>
-                <p>Data dikelompokkan per dokumen PO. Gunakan tombol **Simpan PO** khusus di bawah masing-masing tabel untuk melakukan update agar tidak mengganggu data historis PO lainnya.</p>
-            </div>
-
-            <div>
-                <label class="block text-gray-700 font-semibold mb-1 text-sm"><i class="fa-solid fa-store text-amber-500 mr-1"></i> Nama Toko / Outlet Anda <span class="text-red-500">*</span></label>
-                <div class="flex gap-2">
-                    <select id="receiveStoreName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white font-medium text-gray-800 text-sm">
-                        <option value="" disabled selected>-- Pilih Toko Anda --</option>
-                        <option value="Toko Jababeka">Toko Jababeka</option>
-                        <option value="Toko Pilar">Toko Pilar</option>
-                        <option value="Toko Mega Regency">Toko Mega Regency</option>
-                        <option value="Toko Lippo Cikarang">Toko Lippo Cikarang</option>
-                    </select>
-                    <button type="button" onclick="checkIncomingGoods()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 rounded-lg text-sm font-bold whitespace-nowrap transition duration-200 flex items-center gap-1"><i class="fa-solid fa-magnifying-glass"></i> Cek Barang</button>
-                </div>
-            </div>
-
-            <div id="receiveGroupsContainer" class="space-y-8">
-                <div class="text-center text-gray-400 italic text-xs py-8 border border-dashed border-gray-200 rounded-xl bg-gray-50">Silakan pilih toko dan tekan tombol "Cek Barang" di atas.</div>
-            </div>
-        </div>
-
-        <div id="successScreen" class="hidden bg-white p-6 rounded-b-2xl shadow-md space-y-6">
-            <div class="text-center space-y-2 py-4">
-                <div class="text-green-500 text-6xl"><i class="fa-solid fa-circle-check animate-bounce"></i></div>
-                <h2 class="text-2xl font-black text-gray-800">Pesanan Berhasil Terkirim!</h2>
-                <p class="text-sm text-gray-500">Sistem telah sukses mencatat pesanan Anda ke Google Sheets.</p>
-            </div>
-            <div class="bg-green-50/50 p-4 rounded-xl border border-green-100 text-sm space-y-2">
-                <div class="flex justify-between border-b border-green-100 pb-2"><span class="text-gray-500 font-medium">Toko / Outlet:</span><span id="successStore" class="font-bold text-gray-800"></span></div>
-                <div class="flex justify-between pt-1"><span class="text-gray-500 font-medium">Waktu Kirim:</span><span id="successTime" class="font-bold text-gray-800"></span></div>
-            </div>
-            <div>
-                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Item Terkirim:</div>
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <table class="w-full text-left text-sm text-gray-700">
-                        <thead class="bg-gray-50 text-gray-600 text-xs uppercase font-bold border-b border-gray-200">
-                            <tr><th class="p-3 text-center w-12 bg-gray-100/50">No.</th><th class="p-3">Nama Barang</th><th class="p-3 text-center w-24 bg-gray-100/50">Qty</th></tr>
-                        </thead>
-                        <tbody id="successTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="pt-4"><button onclick="backToInputForm('order')" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-xl font-bold text-base shadow-lg transition duration-200"><i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Form Pemesanan</button></div>
-        </div>
-
-        <div id="successReceiveScreen" class="hidden bg-white p-6 rounded-b-2xl shadow-md space-y-6">
-            <div class="text-center space-y-2 py-4">
-                <div class="text-amber-500 text-6xl"><i class="fa-solid fa-square-check animate-pulse"></i></div>
-                <h2 class="text-2xl font-black text-gray-800">Konfirmasi Diterima Sukses!</h2>
-                <p class="text-sm text-gray-500">Kuantitas fisik barang masuk berhasil diperbarui di Google Sheets.</p>
-            </div>
-            <div class="bg-amber-50/60 p-4 rounded-xl border border-amber-100 text-sm space-y-2">
-                <div class="flex justify-between border-b border-amber-100 pb-2"><span class="text-gray-500 font-medium">Toko Penerima:</span><span id="successRecStore" class="font-bold text-gray-800"></span></div>
-                <div class="flex justify-between pt-1"><span class="text-gray-500 font-medium">Waktu Update:</span><span id="successRecTime" class="font-bold text-gray-800"></span></div>
-            </div>
-            <div>
-                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Ringkasan Fisik yang Diterima:</div>
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <table class="w-full text-left text-sm text-gray-700">
-                        <thead class="bg-gray-50 text-gray-600 text-xs uppercase font-bold border-b border-gray-200">
-                            <tr><th class="p-3 text-center w-12">No.</th><th class="p-3">Nama Barang</th><th class="p-3 text-center w-24">Qty Diterima</th></tr>
-                        </thead>
-                        <tbody id="successRecTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="pt-4"><button onclick="backToInputForm('receive')" class="w-full bg-amber-500 hover:bg-amber-600 text-white p-3.5 rounded-xl font-bold text-base shadow-lg transition duration-200"><i class="fa-solid fa-rotate-left mr-1"></i> Kembali ke Menu Penerimaan</button></div>
-        </div>
-
     </div>
 
     <script>
-        let cart = [];
-        let allProducts = []; 
-        
-        // ⚠️ MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI:
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXaHOYHWQAlt3Bm2Ts-t4zO0LLwmXM9XpSlvQdbU-6-G2ATiO7SdWnUnhfXjy-M3FU/exec"; 
+        // ⚠️ MASUKKAN URL GOOGLE APPS SCRIPT WEB APP ANDA DI SINI
+        const API_URL = "https://script.google.com/macros/s/AKfycbyljnBDhKCEid-i3tacBylCYlo-rLlFmKw1odRGS6KBaWpLrpD8sCGEjE74U4Tglvo2/exec";
 
-        function switchTab(tabName) {
-            const tabOrder = document.getElementById('tabContentOrder');
-            const tabReceive = document.getElementById('tabContentReceive');
-            const btnOrder = document.getElementById('btnTabOrder');
-            const btnReceive = document.getElementById('btnTabReceive');
-            document.getElementById('successScreen').classList.add('hidden');
-            document.getElementById('successReceiveScreen').classList.add('hidden');
+        // Fungsi Perpindahan Tab UI
+        function switchTab(tab) {
+            const btnPo = document.getElementById('btn-tab-po');
+            const btnTerima = document.getElementById('btn-tab-terima');
+            const kontenPo = document.getElementById('konten-buat-po');
+            const kontenTerima = document.getElementById('konten-terima-barang');
 
-            if (tabName === 'order') {
-                tabOrder.classList.remove('hidden');
-                tabReceive.classList.add('hidden');
-                btnOrder.className = "w-1/2 py-3 text-center text-sm font-bold border-b-4 border-blue-600 text-blue-600 transition";
-                btnReceive.className = "w-1/2 py-3 text-center text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-blue-600 transition";
-            } else if (tabName === 'receive') {
-                tabOrder.classList.add('hidden');
-                tabReceive.classList.remove('hidden');
-                btnOrder.className = "w-1/2 py-3 text-center text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-blue-600 transition";
-                btnReceive.className = "w-1/2 py-3 text-center text-sm font-bold border-b-4 border-amber-500 text-amber-500 transition";
+            if (tab === 'buat-po') {
+                btnPo.className = "flex-1 py-4 text-center inline-flex justify-center items-center gap-2 hover:bg-slate-50 transition border-b-2 border-blue-600 text-blue-600 font-bold bg-blue-50/30";
+                btnTerima.className = "flex-1 py-4 text-center inline-flex justify-center items-center gap-2 hover:bg-slate-50 transition border-b-2 border-transparent text-slate-500";
+                kontenPo.classList.remove('hidden');
+                kontenTerima.classList.add('hidden');
+            } else {
+                btnTerima.className = "flex-1 py-4 text-center inline-flex justify-center items-center gap-2 hover:bg-slate-50 transition border-b-2 border-amber-500 text-amber-600 font-bold bg-amber-50/40";
+                btnPo.className = "flex-1 py-4 text-center inline-flex justify-center items-center gap-2 hover:bg-slate-50 transition border-b-2 border-transparent text-slate-500";
+                kontenTerima.classList.remove('hidden');
+                kontenPo.classList.add('hidden');
             }
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            const itemSelect = document.getElementById('itemName');
-            fetch(APPS_SCRIPT_URL)
-            .then(response => response.json())
-            .then(result => {
-                if (result.status === "success") {
-                    allProducts = result.data; 
-                    renderProductOptions(allProducts);
-                    loadDataFromStorage();
-                } else {
-                    itemSelect.innerHTML = `<option value="" disabled selected>-- Gagal memuat database --</option>`;
-                }
-            })
-            .catch(err => {
-                itemSelect.innerHTML = `<option value="" disabled selected>-- Gagal memuat data (Cek Sinyal) --</option>`;
-            });
-        });
-
-        function renderProductOptions(products) {
-            const itemSelect = document.getElementById('itemName');
-            itemSelect.innerHTML = '';
-            if (products.length === 0) {
-                itemSelect.innerHTML = `<option value="" disabled selected>-- Barang tidak ditemukan --</option>`;
+        // Fungsi Menarik Data dari Google Sheets via Apps Script
+        async function muatDataPO() {
+            const namaToko = document.getElementById('select-toko').value;
+            const container = document.getElementById('container-po-cards');
+            const loading = document.getElementById('status-loading');
+            
+            if (!namaToko) {
+                alert("Silakan pilih Nama Toko terlebih dahulu!");
                 return;
             }
-            itemSelect.innerHTML = `<option value="" disabled selected>-- Pilih Nama Barang (${products.length} ditemukan) --</option>`;
-            products.forEach(p => {
-                const option = document.createElement('option');
-                option.value = p.nama;
-                option.textContent = p.kode ? `[${p.kode}] ${p.nama}` : p.nama;
-                itemSelect.appendChild(option);
-            });
-        }
 
-        function filterProducts() {
-            const query = document.getElementById('searchItem').value.trim();
-            if (!query) { renderProductOptions(allProducts); return; }
-            let regexRule = query.includes('%') ? "^" + query.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/%/g, ".*") + "$" : ".*" + query.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1") + ".*";
-            const regex = new RegExp(regexRule, "i"); 
-            const filtered = allProducts.filter(p => regex.test(p.nama) || regex.test(p.kode));
-            renderProductOptions(filtered);
-        }
+            container.innerHTML = "";
+            loading.classList.remove('hidden');
 
-        function saveDataToStorage() {
-            localStorage.setItem('temp_cart', JSON.stringify(cart));
-            localStorage.setItem('temp_store', document.getElementById('storeName').value);
-        }
+            try {
+                const respon = await fetch(`${API_URL}?action=bacaPO&toko=${encodeURIComponent(namaToko)}`);
+                const hasil = await respon.json();
 
-        function loadDataFromStorage() {
-            const savedCart = localStorage.getItem('temp_cart');
-            const savedStore = localStorage.getItem('temp_store');
-            if (savedCart) { cart = JSON.parse(savedCart); renderCart(); }
-            if (savedStore) { document.getElementById('storeName').value = savedStore; }
-        }
+                loading.classList.add('hidden');
 
-        function renderCart() {
-            const tbody = document.getElementById('cartTableBody');
-            const cartCount = document.getElementById('cartCount');
-            tbody.innerHTML = '';
-            if (cart.length === 0) {
-                tbody.innerHTML = `<tr id="emptyRow"><td colspan="4" class="p-4 text-center text-gray-400 italic text-xs">Belum ada barang yang ditambahkan.</td></tr>`;
-                cartCount.textContent = ''; return;
-            }
-            cartCount.textContent = `${cart.length} Item`;
-            cart.forEach((item, index) => {
-                const row = document.createElement('tr');
-                row.className = "border-b border-gray-200 bg-white hover:bg-gray-50 transition";
-                row.innerHTML = `
-                    <td class="p-3 text-center text-gray-500 font-bold">${index + 1}</td>
-                    <td class="p-3 font-medium text-gray-800">${item.name}</td>
-                    <td class="p-3 text-center font-bold text-blue-600">${item.qty}</td>
-                    <td class="p-3 text-center"><button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash"></i></button></td>`;
-                tbody.appendChild(row);
-            });
-        }
-
-        function addToCart() {
-            const itemSelect = document.getElementById('itemName');
-            const qtyInput = document.getElementById('itemQty');
-            const itemName = itemSelect.value;
-            const itemQty = Math.floor(Number(qtyInput.value)); 
-            if (!itemName || itemName.startsWith('--')) { alert('Silakan pilih nama barang!'); return; }
-            if (isNaN(itemQty) || itemQty <= 0) { alert('Masukkan jumlah kuantitas yang valid!'); return; }
-            const existingIndex = cart.findIndex(item => item.name === itemName);
-            if (existingIndex > -1) { cart[existingIndex].qty += itemQty; } else { cart.push({ name: itemName, qty: itemQty }); }
-            itemSelect.selectedIndex = 0; qtyInput.value = ''; document.getElementById('searchItem').value = '';
-            renderProductOptions(allProducts); renderCart(); saveDataToStorage();
-        }
-
-        function removeFromCart(index) { cart.splice(index, 1); renderCart(); saveDataToStorage(); }
-
-        function backToInputForm(tabTarget) {
-            document.getElementById('successScreen').classList.add('hidden');
-            document.getElementById('successReceiveScreen').classList.add('hidden');
-            if (tabTarget === 'order') {
-                document.getElementById('tabContentOrder').classList.remove('hidden');
-            } else {
-                document.getElementById('tabContentReceive').classList.remove('hidden');
-                checkIncomingGoods(); 
-            }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function submitOrder() {
-            const storeName = document.getElementById('storeName').value;
-            if (!storeName) { alert('Pilih Nama Toko terlebih dahulu!'); return; }
-            if (cart.length === 0) { alert('Daftar pesanan kosong!'); return; }
-            const btn = document.getElementById('btnSubmit');
-            btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Mengirim...`;
-            
-            fetch(APPS_SCRIPT_URL, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'text/plain' }, 
-                body: JSON.stringify({ toko: storeName, pesanan: cart }) 
-            })
-            .then(res => res.json())
-            .then((result) => {
-                if(result.status === "success") {
-                    document.getElementById('tabContentOrder').classList.add('hidden');
-                    document.getElementById('successScreen').classList.remove('hidden');
-                    document.getElementById('successStore').textContent = storeName;
-                    document.getElementById('successTime').textContent = new Date().toLocaleString('id-ID') + ' WIB';
-                    const sTbody = document.getElementById('successTableBody'); sTbody.innerHTML = '';
-                    cart.forEach((item, index) => {
-                        sTbody.innerHTML += `<tr><td class="p-3 text-center text-gray-400 font-bold">${index+1}</td><td class="p-3 font-semibold text-gray-800">${item.name}</td><td class="p-3 text-center font-bold text-green-600">${item.qty} Pcs</td></tr>`;
-                    });
-                    localStorage.removeItem('temp_cart'); cart = []; renderCart();
+                if (hasil.status === 'sukses' && hasil.data.length > 0) {
+                    renderCardsPO(hasil.data);
                 } else {
-                    alert("Gagal mengirim PO: " + result.message);
+                    container.innerHTML = `
+                        <div class="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl text-center text-sm">
+                            <i class="fa-solid fa-triangle-exclamation mr-1 text-red-600"></i> Tidak ada data PO aktif atau belum dikonfirmasi untuk <strong>${namaToko}</strong>.
+                        </div>`;
                 }
-            })
-            .catch(err => { alert('Gagal terhubung ke server. Periksa jaringan internet Anda.'); })
-            .finally(() => { btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Kirim Semua Pesanan Sekarang`; });
+            } catch (error) {
+                loading.classList.add('hidden');
+                console.error(error);
+                container.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl text-center text-sm">
+                        <i class="fa-solid fa-circle-xmark mr-1 text-red-600"></i> Gagal terhubung ke server. Pastikan URL Apps Script sudah benar & izin akses diatur ke 'Anyone'.
+                    </div>`;
+            }
         }
 
-        // ==================== 🔄 TAB 2: MEKANISME BARU GRUP MANDIRI PER DOKUMEN PO ====================
-        
-        function checkIncomingGoods() {
-            const store = document.getElementById('receiveStoreName').value;
-            if (!store) { alert('Silakan pilih Nama Toko Anda!'); return; }
+        // Fungsi Mengelompokkan Data dan Membuat Tampilan Kartu Per PO
+        function renderCardsPO(dataPO) {
+            const container = document.getElementById('container-po-cards');
+            
+            // Pengelompokkan data berdasarkan Tanggal PO agar rapi per dokumen
+            const kelompokPO = {};
+            dataPO.forEach(item => {
+                if (!kelompokPO[item.tanggalRaw]) {
+                    kelompokPO[item.tanggalRaw] = [];
+                }
+                kelompokPO[item.tanggalRaw].push(item);
+            });
 
-            const container = document.getElementById('receiveGroupsContainer');
-            container.innerHTML = `<div class="text-center text-gray-500 font-medium py-8"><i class="fa-solid fa-spinner animate-spin text-amber-500 mr-2"></i>Memuat & mengamankan data 30 hari terakhir...</div>`;
+            // Loop untuk merender setiap kelompok PO menjadi satu Kartu Mandiri
+            Object.keys(kelompokPO).forEach((keyTanggal, indeks) => {
+                const items = kelompokPO[keyTanggal];
+                const infoPO = items[0]; 
+                const totalItem = items.length;
 
-            fetch(`${APPS_SCRIPT_URL}?action=getReceiptData&toko=${encodeURIComponent(store)}`)
-            .then(response => response.json())
-            .then(result => {
-                container.innerHTML = '';
-                if (result.status === "success" && result.data.length > 0) {
-                    
-                    // Kelompokkan data berdasarkan Tanggal PO
-                    const groupedData = {};
-                    result.data.forEach(item => {
-                        if (!groupedData[item.tanggal]) { groupedData[item.tanggal] = []; }
-                        groupedData[item.tanggal].push(item);
-                    });
-
-                    const orderDates = Object.keys(groupedData);
-
-                    orderDates.forEach((dateGroup, gIndex) => {
-                        // Membuat ID unik yang aman untuk CSS Selector berdasarkan string tanggal
-                        const safeDateId = "group_" + dateGroup.replace(/[^a-zA-Z0-9]/g, "_") + "_" + gIndex;
-                        const itemsInGroup = groupedData[dateGroup].reverse();
-
-                        // ✨ Render bentuk CARD MANDIRI untuk masing-masing Dokumen PO
-                        const cardDiv = document.createElement('div');
-                        cardDiv.id = safeDateId;
-                        cardDiv.className = "bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden space-y-3 pb-4 bg-gray-50/30";
+                // Template Kartu PO dengan Header Biru Tua dan Badge Jumlah Item
+                let cardHtml = `
+                    <div class="border border-indigo-100 rounded-xl overflow-hidden shadow-md bg-white animate-fadeIn">
                         
-                        let tableRowsHtml = '';
-                        itemsInGroup.forEach((item, localIndex) => {
-                            const sudahAdaData = (item.qtyDiterimaToko !== "" && item.qtyDiterimaToko !== undefined);
-                            const nilaiAwalBox = sudahAdaData ? item.qtyDiterimaToko : item.qtyPO;
-                            
-                            const badgeStatus = sudahAdaData 
-                                ? `<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded border border-green-200"><i class="fa-solid fa-check-double"></i> Dikonfirmasi: ${item.qtyDiterimaToko}</span>`
-                                : `<span class="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded border border-amber-200"><i class="fa-solid fa-clock"></i> Belum Diterima</span>`;
+                        <div class="bg-indigo-900 text-white p-4 flex justify-between items-center gap-4">
+                            <div class="flex items-center gap-2 text-xs md:text-sm font-semibold tracking-wide">
+                                <i class="fa-solid fa-file-invoice text-indigo-300 text-base"></i>
+                                <span>PO: ${infoPO.tanggalFormatted}</span>
+                            </div>
+                            <span class="bg-indigo-800 text-indigo-200 text-[10px] md:text-xs font-bold px-2 py-1 rounded-md uppercase border border-indigo-700/60 flex-shrink-0">
+                                ${totalItem} Item
+                            </span>
+                        </div>
 
-                            tableRowsHtml += `
-                                <tr class="border-b border-gray-200 bg-white text-xs sm:text-sm">
-                                    <td class="p-3 text-center text-gray-400 font-bold">${localIndex + 1}</td>
-                                    <td class="p-3">
-                                        <div class="font-semibold text-gray-800">${item.nama} ${badgeStatus}</div>
-                                        <div class="text-[10px] text-gray-400 font-mono">Kode: ${item.kode || '-'}</div>
-                                    </td>
-                                    <td class="p-3 text-center font-bold text-gray-500 bg-gray-50">${item.qtyPO}</td>
-                                    <td class="p-3 text-center">
-                                        <input type="number" data-row="${item.rowNum}" data-name="${item.nama}" min="0" value="${nilaiAwalBox}" class="receipt-input-${safeDateId} w-20 p-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none font-bold text-amber-600 bg-amber-50/20">
-                                    </td>
-                                </tr>
-                            `;
-                        });
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs md:text-sm">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                                        <th class="py-3 px-3 text-center w-12">No</th>
+                                        <th class="py-3 px-3">Detail Barang</th>
+                                        <th class="py-3 px-3 text-center w-20">Qty PO</th>
+                                        <th class="py-3 px-3 text-center w-28">Fisik Datang</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">`;
 
-                        cardDiv.innerHTML = `
-                            <div class="bg-indigo-900 text-white font-bold p-3 text-xs sm:text-sm uppercase flex justify-between items-center tracking-wide">
-                                <span><i class="fa-solid fa-receipt text-indigo-300 mr-2"></i> PO: ${dateGroup} WIB</span>
-                                <span class="bg-indigo-800 px-2 py-0.5 rounded text-[10px] border border-indigo-700">${itemsInGroup.length} Item</span>
-                            </div>
-                            <div class="px-3 overflow-x-auto">
-                                <table class="w-full text-left border border-gray-200 rounded-lg overflow-hidden min-w-[480px]">
-                                    <thead class="bg-gray-100 text-gray-600 text-[11px] uppercase font-bold border-b border-gray-200">
-                                        <tr><th class="p-2 text-center w-12">No</th><th class="p-2">Detail Barang</th><th class="p-2 text-center w-20">Qty PO</th><th class="p-2 text-center w-28">Fisik Datang</th></tr>
-                                    </thead>
-                                    <tbody>${tableRowsHtml}</tbody>
-                                </table>
-                            </div>
-                            <div class="px-3 pt-2">
-                                <button id="btnSubmit-${safeDateId}" onclick="submitSingleGroupReceipt('${safeDateId}', '${dateGroup}')" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow transition flex justify-center items-center gap-1">
-                                    <i class="fa-solid fa-circle-check"></i> Simpan Penerimaan PO Tanggal Ini saja
-                                </button>
-                            </div>
-                        `;
-                        container.appendChild(cardDiv);
-                    });
-                } else {
-                    container.innerHTML = `<div class="text-center text-gray-400 italic text-xs py-8">Tidak ada riwayat pengiriman barang dalam 30 hari terakhir untuk toko ini.</div>`;
-                }
-            })
-            .catch(err => {
-                container.innerHTML = `<div class="text-center text-red-500 italic text-xs py-8">Gagal memuat kiriman. Periksa koneksi internet Anda!</div>`;
+                // Render Baris Barang di dalam tabel
+                items.forEach((barang, idx) => {
+                    const statusBadge = barang.sudahDiterima 
+                        ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded border border-emerald-200 inline-flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Diterima</span>`
+                        : `<span class="bg-amber-100 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded border border-amber-200 inline-flex items-center gap-1"><i class="fa-solid fa-clock"></i> Belum Diterima</span>`;
+
+                    cardHtml += `
+                        <tr class="hover:bg-slate-50/80 transition">
+                            <td class="py-4 px-3 text-center font-medium text-slate-400">${idx + 1}</td>
+                            <td class="py-4 px-3">
+                                <div class="font-bold text-slate-900 text-xs md:text-sm">${barang.namaBarang}</div>
+                                <div class="text-[11px] text-slate-400 mt-0.5 flex flex-wrap gap-2 items-center">
+                                    <span>Kode: ${barang.kodeBarang}</span>
+                                    ${statusBadge}
+                                </div>
+                            </td>
+                            <td class="py-4 px-3 text-center font-bold text-slate-600 bg-slate-50/50">${barang.kuantitasPO}</td>
+                            <td class="py-4 px-3 text-center">
+                                <input type="number" 
+                                       data-row="${barang.rowNum}" 
+                                       data-original="${barang.kuantitasPO}"
+                                       value="${barang.kuantitasDiterimaToko || barang.kuantitasPO}" 
+                                       min="0" 
+                                       class="input-fisik-datang w-20 text-center border border-slate-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold bg-white text-slate-800 shadow-sm text-xs md:text-sm">
+                            </td>
+                        </tr>`;
+                });
+
+                cardHtml += `
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="bg-slate-50 border-t border-slate-100 p-4 flex justify-end">
+                            <button onclick="simpanPenerimaanDokumen(this)" class="bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-2 px-5 rounded-lg shadow-md inline-flex items-center gap-2 transition text-xs md:text-sm">
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan Penerimaan PO
+                            </button>
+                        </div>
+
+                    </div>`;
+
+                container.insertAdjacentHTML('beforeend', cardHtml);
             });
         }
 
-        // ✨ PROSES BARU: HANYA MENGIRIM DATA DARI SATU KELOMPOK PO TANGGAL TERTENTU
-        function submitSingleGroupReceipt(safeDateId, dateGroupLabel) {
-            const inputs = document.querySelectorAll(`.receipt-input-${safeDateId}`);
-            if (inputs.length === 0) return;
-
-            const confirmationData = [];
-            const summaryArray = [];
-            let isValid = true;
-
-            inputs.forEach(input => {
-                const rowNum = input.getAttribute('data-row');
-                const itemName = input.getAttribute('data-name');
-                const qtyVal = input.value.trim();
-
-                if (qtyVal === "" || isNaN(qtyVal) || Number(qtyVal) < 0) {
-                    isValid = false;
-                } else {
-                    confirmationData.push({ rowNum: Number(rowNum), nama: itemName, qtyDiterima: Number(qtyVal) });
-                    summaryArray.push({ name: itemName, qty: qtyVal });
-                }
-            });
-
-            if (!isValid) { alert('Kuantitas fisik tidak boleh kosong atau bernilai negatif!'); return; }
-            if (!confirm(`Apakah Anda yakin kuantitas fisik untuk PO tanggal ${dateGroupLabel} sudah dihitung dengan benar?`)) return;
-
-            const btn = document.getElementById(`btnSubmit-${safeDateId}`);
-            const store = document.getElementById('receiveStoreName').value;
+        // Fungsi Mengirim Konfirmasi Fisik Barang ke Server (Optimistic Locking Aktif)
+        async function simpanPenerimaanDokumen(tombol) {
+            const cardInduk = tombol.closest('.border-indigo-100');
+            const inputs = cardInduk.querySelectorAll('.input-fisik-datang');
             
-            btn.disabled = true; 
-            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Memperbarui Server...`;
-
-            // ✨ HAPUS BINDSPOT: Kirim tanpa no-cors, dengan text/plain agar status sukses terbaca penuh
-            fetch(APPS_SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify({ action: "submitReceipt", toko: store, data: confirmationData })
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.status === "success") {
-                    document.getElementById('tabContentReceive').classList.add('hidden');
-                    document.getElementById('successReceiveScreen').classList.remove('hidden');
-                    document.getElementById('successRecStore').textContent = store;
-                    document.getElementById('successRecTime').textContent = new Date().toLocaleString('id-ID') + ' WIB';
-                    
-                    const recTbody = document.getElementById('successRecTableBody');
-                    recTbody.innerHTML = '';
-                    summaryArray.forEach((item, index) => {
-                        recTbody.innerHTML += `<tr><td class="p-3 text-center text-gray-400 font-bold">${index+1}</td><td class="p-3 font-semibold text-gray-800">${item.name}</td><td class="p-3 text-center font-bold text-amber-600">${item.qty} Pcs</td></tr>`;
-                    });
-                } else {
-                    // Jika terjadi konflik pergeseran baris oleh admin pusat, error ditangkap di sini
-                    alert("⚠️ KOREKSI DI TOLAK SERVER:\n\n" + result.message);
-                    checkIncomingGoods(); // Paksa muat ulang halaman untuk mengambil posisi baris terbaru
-                }
-            })
-            .catch(err => { 
-                alert('Koneksi internet terputus atau server tidak merespon. Data gagal disimpan!'); 
-            })
-            .finally(() => { 
-                btn.disabled = false; 
-                btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Simpan Penerimaan PO Tanggal Ini saja`; 
+            // Mengemas data barang spesifik dari dokumen PO yang diklik saja
+            const payloadData = [];
+            inputs.forEach(input => {
+                payloadData.push({
+                    rowNum: parseInt(input.getAttribute('data-row')),
+                    originalValue: input.getAttribute('data-original'), // Untuk validasi baris di server
+                    jumlahFisik: parseInt(input.value) || 0
+                });
             });
+
+            if(payloadData.length === 0) return;
+
+            // Efek visual Loading pada tombol saat pengiriman data berlangsung
+            const teksAsli = tombol.innerHTML;
+            tombol.disabled = true;
+            tombol.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memproses...`;
+
+            try {
+                const respon = await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Menghindari kendala CORS bawaan web standar
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'simpanPenerimaan',
+                        items: payloadData
+                    })
+                });
+
+                // Notifikasi Sukses Operasional
+                alert("✅ LAPORAN TERKIRIM!\nData penerimaan PO berhasil disimpan ke Google Sheets pusat.");
+                muatDataPO(); // Refresh tampilan untuk memperbarui badge status menjadi "Diterima"
+            } catch (error) {
+                console.error(error);
+                alert("⚠️ GAGAL MENYIMPAN!\nTerjadi gangguan jaringan atau server sibuk. Silakan tunggu beberapa saat lalu coba klik Simpan lagi.");
+            } finally {
+                tombol.disabled = false;
+                tombol.innerHTML = teksAsli;
+            }
         }
     </script>
 </body>
