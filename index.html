@@ -31,10 +31,63 @@
         <div class="bg-white p-6 rounded-b-2xl shadow-md">
             
             <div id="konten-buat-po" class="hidden animate-fadeIn">
-                <div class="text-center py-12 text-slate-400">
-                    <i class="fa-solid fa-basket-shopping text-5xl mb-3 text-slate-300"></i>
-                    <p class="font-medium">Formulir Pembuatan PO Baru</p>
-                    <p class="text-xs text-slate-400 mt-1">Fitur ini dapat diintegrasikan dengan form input pesanan supplier Anda.</p>
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-900 flex items-start gap-3 shadow-sm mb-6">
+                    <i class="fa-solid fa-circle-info mt-0.5 text-blue-600 text-base flex-shrink-0"></i>
+                    <div>
+                        <span class="font-bold text-blue-950 block mb-1 text-sm"><i class="fa-solid fa-file-circle-plus mr-1"></i> FORMULIR PENJURNALAN PO BARU:</span>
+                        <p class="text-xs md:text-sm">Gunakan form ini untuk mendistribusikan Purchase Order (PO) barang baru dari Supplier menuju cabang outlet tertentu ke database pusat.</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-4 mb-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Target Toko / Outlet <span class="text-red-500">*</span></label>
+                            <select id="po-toko" class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm text-sm">
+                                <option value="">-- Pilih Target Outlet --</option>
+                                <option value="Toko Mega Regency">Toko Mega Regency</option>
+                                <option value="Toko Lippo Cikarang">Toko Lippo Cikarang</option>
+                                <option value="Toko Jababeka">Toko Jababeka</option>
+                                <option value="Toko Pilar">Toko Pilar</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nama Supplier <span class="text-red-500">*</span></label>
+                            <input type="text" id="po-supplier" placeholder="Contoh: Wen's Food and Resto" class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm text-sm">
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-200 pt-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-blue-600"></i> Item Barang di dalam PO
+                            </h3>
+                            <button type="button" onclick="tambahBarisBarangPO()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs shadow inline-flex items-center gap-1 transition">
+                                <i class="fa-solid fa-plus"></i> Tambah Item
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs md:text-sm">
+                                <thead>
+                                    <tr class="bg-slate-200/60 text-slate-700 font-bold uppercase tracking-wider text-[10px]">
+                                        <th class="py-2 px-2">Kode Barang (Barcode)</th>
+                                        <th class="py-2 px-2">Nama Detail Barang</th>
+                                        <th class="py-2 px-2 w-24 text-center">Qty PO</th>
+                                        <th class="py-2 px-2 w-12 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-item-po" class="divide-y divide-slate-200">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button onclick="kirimPOBaruKeServer(this)" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-2.5 px-6 rounded-lg shadow-md inline-flex items-center gap-2 transition text-sm">
+                        <i class="fa-solid fa-paper-plane"></i> Simpan & Distribusikan PO
+                    </button>
                 </div>
             </div>
 
@@ -46,9 +99,8 @@
                         <span class="font-bold text-amber-950 block mb-1 text-sm"><i class="fa-solid fa-map-signs mr-1"></i> PANDUAN PENERIMAAN BARANG TOKO:</span>
                         <ul class="list-disc list-inside space-y-1 text-xs md:text-sm text-amber-900">
                             <li>Pilih <strong>Nama Toko / Outlet</strong> Anda, lalu klik tombol <strong class="text-amber-700">Cek Barang</strong> untuk memuat data.</li>
-                            <li>Sistem akan mengelompokkan barang berdasarkan <strong>Waktu Dokumen PO</strong> yang dikirim dari pusat.</li>
                             <li>Hitung fisik produk yang datang di toko, lalu isi jumlah aktualnya pada kolom <strong>Fisik Datang</strong>.</li>
-                            <li>Setelah selesai memeriksa satu dokumen PO, klik tombol <strong>Simpan Penerimaan PO</strong> di bawah tabel dokumen tersebut untuk mengirim laporan ke pusat.</li>
+                            <li>Setelah selesai memeriksa satu dokumen PO, klik tombol <strong>Simpan Penerimaan PO</strong> di bawah tabel terkait.</li>
                         </ul>
                     </div>
                 </div>
@@ -90,9 +142,8 @@
 
     <script>
         // ⚠️ MASUKKAN URL GOOGLE APPS SCRIPT WEB APP ANDA DI SINI
-        const API_URL = "https://script.google.com/macros/s/AKfycbyljnBDhKCEid-i3tacBylCYlo-rLlFmKw1odRGS6KBaWpLrpD8sCGEjE74U4Tglvo2/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbz_YZt6TEf2pxonfzgTS-gCC9g7X58Ph1F_3GIKPMv4kvpt88iwkNmJVBYGLfo2U0lC/exec";
 
-        // Fungsi Perpindahan Tab UI
         function switchTab(tab) {
             const btnPo = document.getElementById('btn-tab-po');
             const btnTerima = document.getElementById('btn-tab-terima');
@@ -112,16 +163,96 @@
             }
         }
 
-        // Fungsi Menarik Data dari Google Sheets via Apps Script
+        // --- LOGIKA TAB 1: BUAT PO BARU ---
+        function tambahBarisBarangPO() {
+            const tbody = document.getElementById('tbody-item-po');
+            const rowHtml = `
+                <tr class="baris-item-po-baru bg-white hover:bg-slate-50/80 transition">
+                    <td class="py-2 px-1">
+                        <input type="text" placeholder="Barcode / Kode" class="po-item-kode w-full bg-white border border-slate-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs">
+                    </td>
+                    <td class="py-2 px-1">
+                        <input type="text" placeholder="Nama Produk" class="po-item-nama w-full bg-white border border-slate-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs font-semibold">
+                    </td>
+                    <td class="py-2 px-1 text-center">
+                        <input type="number" value="1" min="1" class="po-item-qty w-20 text-center border border-slate-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs font-bold">
+                    </td>
+                    <td class="py-2 px-1 text-center">
+                        <button type="button" onclick="hapusBarisBarangPO(this)" class="text-red-500 hover:text-red-700 p-1 transition">
+                            <i class="fa-solid fa-trash-can text-sm"></i>
+                        </button>
+                    </td>
+                </tr>`;
+            tbody.insertAdjacentHTML('beforeend', rowHtml);
+        }
+
+        function hapusBarisBarangPO(btn) {
+            btn.closest('tr').remove();
+        }
+
+        async function kirimPOBaruKeServer(tombol) {
+            const toko = document.getElementById('po-toko').value;
+            const supplier = document.getElementById('po-supplier').value;
+            const rows = document.querySelectorAll('.baris-item-po-baru');
+            
+            if (!toko) { alert("Silakan pilih Target Toko / Outlet!"); return; }
+            if (!supplier.trim()) { alert("Silakan isi Nama Supplier!"); return; }
+            if (rows.length === 0) { alert("Harap tambahkan minimal 1 item barang!"); return; }
+
+            const payloadItems = [];
+            let valid = true;
+
+            rows.forEach(row => {
+                const kode = row.querySelector('.po-item-kode').value.trim();
+                const nama = row.querySelector('.po-item-nama').value.trim();
+                const qty = parseInt(row.querySelector('.po-item-qty').value) || 0;
+
+                if (!kode || !nama || qty <= 0) { valid = false; }
+                payloadItems.push({ kodeBarang: kode, namaBarang: nama, kuantitasPO: qty });
+            });
+
+            if (!valid) {
+                alert("Harap lengkapi Kode Barang, Nama Barang, dan Qty PO (>0) di setiap baris!");
+                return;
+            }
+
+            const teksAsli = tombol.innerHTML;
+            tombol.disabled = true;
+            tombol.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memproses...`;
+
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'buatPO',
+                        toko: toko,
+                        supplier: supplier,
+                        items: payloadItems
+                    })
+                });
+
+                alert("✅ PO BERHASIL DISIMPAN!\nData pesanan PO baru berhasil ditambahkan ke Sheets pusat.");
+                document.getElementById('po-supplier').value = "";
+                document.getElementById('tbody-item-po').innerHTML = "";
+                tambahBarisBarangPO();
+            } catch (error) {
+                console.error(error);
+                alert("⚠️ GAGAL MENYIMPAN PO!\nTerjadi gangguan koneksi atau server pusat sedang sibuk.");
+            } finally {
+                tombol.disabled = false;
+                tombol.innerHTML = teksAsli;
+            }
+        }
+
+        // --- LOGIKA TAB 2: MUAT & TERIMA BARANG TOKO ---
         async function muatDataPO() {
             const namaToko = document.getElementById('select-toko').value;
             const container = document.getElementById('container-po-cards');
             const loading = document.getElementById('status-loading');
             
-            if (!namaToko) {
-                alert("Silakan pilih Nama Toko terlebih dahulu!");
-                return;
-            }
+            if (!namaToko) { alert("Silakan pilih Nama Toko terlebih dahulu!"); return; }
 
             container.innerHTML = "";
             loading.classList.remove('hidden');
@@ -129,7 +260,6 @@
             try {
                 const respon = await fetch(`${API_URL}?action=bacaPO&toko=${encodeURIComponent(namaToko)}`);
                 const hasil = await respon.json();
-
                 loading.classList.add('hidden');
 
                 if (hasil.status === 'sukses' && hasil.data.length > 0) {
@@ -137,7 +267,7 @@
                 } else {
                     container.innerHTML = `
                         <div class="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl text-center text-sm">
-                            <i class="fa-solid fa-triangle-exclamation mr-1 text-red-600"></i> Tidak ada data PO aktif atau belum dikonfirmasi untuk <strong>${namaToko}</strong>.
+                            <i class="fa-solid fa-triangle-exclamation mr-1 text-red-600"></i> Tidak ada data PO aktif untuk <strong>${namaToko}</strong>.
                         </div>`;
                 }
             } catch (error) {
@@ -145,40 +275,33 @@
                 console.error(error);
                 container.innerHTML = `
                     <div class="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl text-center text-sm">
-                        <i class="fa-solid fa-circle-xmark mr-1 text-red-600"></i> Gagal terhubung ke server. Pastikan URL Apps Script sudah benar & izin akses diatur ke 'Anyone'.
+                        <i class="fa-solid fa-circle-xmark mr-1 text-red-600"></i> Gagal terhubung ke server. Hubungkan ulang Apps Script & atur akses ke 'Anyone'.
                     </div>`;
             }
         }
 
-        // Fungsi Mengelompokkan Data dan Membuat Tampilan Kartu Per PO
         function renderCardsPO(dataPO) {
             const container = document.getElementById('container-po-cards');
-            
-            // Pengelompokkan data berdasarkan Tanggal PO agar rapi per dokumen
             const kelompokPO = {};
+            
             dataPO.forEach(item => {
-                if (!kelompokPO[item.tanggalRaw]) {
-                    kelompokPO[item.tanggalRaw] = [];
-                }
+                if (!kelompokPO[item.tanggalRaw]) { kelompokPO[item.tanggalRaw] = []; }
                 kelompokPO[item.tanggalRaw].push(item);
             });
 
-            // Loop untuk merender setiap kelompok PO menjadi satu Kartu Mandiri
-            Object.keys(kelompokPO).forEach((keyTanggal, indeks) => {
+            Object.keys(kelompokPO).forEach((keyTanggal) => {
                 const items = kelompokPO[keyTanggal];
                 const infoPO = items[0]; 
                 const totalItem = items.length;
 
-                // Template Kartu PO dengan Header Biru Tua dan Badge Jumlah Item
                 let cardHtml = `
-                    <div class="border border-indigo-100 rounded-xl overflow-hidden shadow-md bg-white animate-fadeIn">
-                        
+                    <div class="border border-indigo-100 rounded-xl overflow-hidden shadow-md bg-white">
                         <div class="bg-indigo-900 text-white p-4 flex justify-between items-center gap-4">
                             <div class="flex items-center gap-2 text-xs md:text-sm font-semibold tracking-wide">
                                 <i class="fa-solid fa-file-invoice text-indigo-300 text-base"></i>
                                 <span>PO: ${infoPO.tanggalFormatted}</span>
                             </div>
-                            <span class="bg-indigo-800 text-indigo-200 text-[10px] md:text-xs font-bold px-2 py-1 rounded-md uppercase border border-indigo-700/60 flex-shrink-0">
+                            <span class="bg-indigo-800 text-indigo-200 text-[10px] md:text-xs font-bold px-2 py-1 rounded-md uppercase border border-indigo-700/60">
                                 ${totalItem} Item
                             </span>
                         </div>
@@ -195,18 +318,18 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">`;
 
-                // Render Baris Barang di dalam tabel
                 items.forEach((barang, idx) => {
+                    // Perbaikan bug teks patah (Penambahan class whitespace-nowrap)
                     const statusBadge = barang.sudahDiterima 
-                        ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded border border-emerald-200 inline-flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Diterima</span>`
-                        : `<span class="bg-amber-100 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded border border-amber-200 inline-flex items-center gap-1"><i class="fa-solid fa-clock"></i> Belum Diterima</span>`;
+                        ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded border border-emerald-200 inline-flex items-center gap-1 whitespace-nowrap"><i class="fa-solid fa-circle-check"></i> Diterima</span>`
+                        : `<span class="bg-amber-100 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded border border-amber-200 inline-flex items-center gap-1 whitespace-nowrap"><i class="fa-solid fa-clock"></i> Belum Diterima</span>`;
 
                     cardHtml += `
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="py-4 px-3 text-center font-medium text-slate-400">${idx + 1}</td>
                             <td class="py-4 px-3">
                                 <div class="font-bold text-slate-900 text-xs md:text-sm">${barang.namaBarang}</div>
-                                <div class="text-[11px] text-slate-400 mt-0.5 flex flex-wrap gap-2 items-center">
+                                <div class="text-[11px] text-slate-400 mt-1 flex flex-wrap gap-x-3 gap-y-1 items-center">
                                     <span>Kode: ${barang.kodeBarang}</span>
                                     ${statusBadge}
                                 </div>
@@ -218,7 +341,7 @@
                                        data-original="${barang.kuantitasPO}"
                                        value="${barang.kuantitasDiterimaToko || barang.kuantitasPO}" 
                                        min="0" 
-                                       class="input-fisik-datang w-20 text-center border border-slate-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold bg-white text-slate-800 shadow-sm text-xs md:text-sm">
+                                       class="input-fisik-datang w-20 text-center border border-slate-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold bg-white text-slate-800 text-xs md:text-sm shadow-sm">
                             </td>
                         </tr>`;
                 });
@@ -233,39 +356,35 @@
                                 <i class="fa-solid fa-floppy-disk"></i> Simpan Penerimaan PO
                             </button>
                         </div>
-
                     </div>`;
 
                 container.insertAdjacentHTML('beforeend', cardHtml);
             });
         }
 
-        // Fungsi Mengirim Konfirmasi Fisik Barang ke Server (Optimistic Locking Aktif)
         async function simpanPenerimaanDokumen(tombol) {
             const cardInduk = tombol.closest('.border-indigo-100');
             const inputs = cardInduk.querySelectorAll('.input-fisik-datang');
-            
-            // Mengemas data barang spesifik dari dokumen PO yang diklik saja
             const payloadData = [];
+            
             inputs.forEach(input => {
                 payloadData.push({
                     rowNum: parseInt(input.getAttribute('data-row')),
-                    originalValue: input.getAttribute('data-original'), // Untuk validasi baris di server
+                    originalValue: input.getAttribute('data-original'),
                     jumlahFisik: parseInt(input.value) || 0
                 });
             });
 
             if(payloadData.length === 0) return;
 
-            // Efek visual Loading pada tombol saat pengiriman data berlangsung
             const teksAsli = tombol.innerHTML;
             tombol.disabled = true;
             tombol.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memproses...`;
 
             try {
-                const respon = await fetch(API_URL, {
+                await fetch(API_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // Menghindari kendala CORS bawaan web standar
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'simpanPenerimaan',
@@ -273,17 +392,21 @@
                     })
                 });
 
-                // Notifikasi Sukses Operasional
                 alert("✅ LAPORAN TERKIRIM!\nData penerimaan PO berhasil disimpan ke Google Sheets pusat.");
-                muatDataPO(); // Refresh tampilan untuk memperbarui badge status menjadi "Diterima"
+                muatDataPO();
             } catch (error) {
                 console.error(error);
-                alert("⚠️ GAGAL MENYIMPAN!\nTerjadi gangguan jaringan atau server sibuk. Silakan tunggu beberapa saat lalu coba klik Simpan lagi.");
+                alert("⚠️ GAGAL MENYIMPAN!\nTerjadi gangguan jaringan atau server sibuk.");
             } finally {
                 tombol.disabled = false;
                 tombol.innerHTML = teksAsli;
             }
         }
+
+        // Jalankan 1 baris item kosong default pada Form PO baru saat web dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            tambahBarisBarangPO();
+        });
     </script>
 </body>
 </html>
