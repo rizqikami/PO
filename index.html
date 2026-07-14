@@ -85,8 +85,8 @@
 
         <div id="tabContentReceive" class="bg-white p-6 rounded-b-2xl shadow-md space-y-6 hidden">
             <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-amber-800 text-xs space-y-1">
-                <p class="font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Panduan & Fitur Koreksi:</p>
-                <p>Menampilkan semua kiriman 7 hari terakhir. Jika Anda **salah input sebelumnya**, cukup ganti angkanya di sini lalu klik Simpan kembali untuk memperbarui data di Google Sheets.</p>
+                <p class="font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Panduan Kelompok Tanggal:</p>
+                <p>Data di bawah ini otomatis **dikelompokkan per tanggal pembuatan PO**. PO terbaru berada di paling atas agar staf Anda tidak kehilangan orientasi dokumen.</p>
             </div>
 
             <div>
@@ -108,7 +108,7 @@
                 <div class="border border-gray-200 rounded-lg overflow-x-auto bg-gray-50">
                     <table class="w-full text-left text-sm text-gray-700 min-w-[500px]">
                         <thead class="bg-gray-200 text-gray-600 text-xs uppercase font-bold">
-                            <tr><th class="p-3 text-center w-12">No.</th><th class="p-3">Detail Kiriman / Item Barang</th><th class="p-3 text-center w-20">Qty PO</th><th class="p-3 text-center w-32">Qty Diterima</th></tr>
+                            <tr><th class="p-3 text-center w-12">No.</th><th class="p-3">Detail Item Barang</th><th class="p-3 text-center w-20">Qty PO</th><th class="p-3 text-center w-32">Qty Diterima</th></tr>
                         </thead>
                         <tbody id="receiveTableBody">
                             <tr><td colspan="4" class="p-4 text-center text-gray-400 italic text-xs">Silakan pilih toko dan tekan tombol "Cek Barang" di atas.</td></tr>
@@ -299,7 +299,7 @@
                 document.getElementById('tabContentOrder').classList.remove('hidden');
             } else {
                 document.getElementById('tabContentReceive').classList.remove('hidden');
-                checkIncomingGoods(); // Segarkan daftar terima barang
+                checkIncomingGoods(); 
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -326,7 +326,7 @@
             .finally(() => { btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Kirim Semua Pesanan Sekarang`; });
         }
 
-        // ==================== 🔄 TAB 2: LOGIKA PENERIMAAN & EDIT ULANG ====================
+        // ==================== 🔄 TAB 2: LOGIKA PENERIMAAN BERBASIS GRUP TANGGAL PO ====================
         
         function checkIncomingGoods() {
             const store = document.getElementById('receiveStoreName').value;
@@ -335,7 +335,7 @@
             const tbody = document.getElementById('receiveTableBody');
             const btnSubmitReceive = document.getElementById('btnSubmitReceive');
             
-            tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500 font-medium"><i class="fa-solid fa-spinner animate-spin text-amber-500 mr-2"></i>Membaca data kiriman 7 hari terakhir...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500 font-medium"><i class="fa-solid fa-spinner animate-spin text-amber-500 mr-2"></i>Membaca & mengelompokkan data kiriman 30 hari terakhir...</td></tr>`;
             btnSubmitReceive.disabled = true;
             btnSubmitReceive.className = "w-full bg-gray-400 text-white p-3.5 rounded-xl font-bold text-base shadow-lg cursor-not-allowed flex justify-center items-center gap-2";
 
@@ -344,37 +344,66 @@
             .then(result => {
                 tbody.innerHTML = '';
                 if (result.status === "success" && result.data.length > 0) {
-                    result.data.forEach((item, index) => {
-                        const row = document.createElement('tr');
-                        row.className = "border-b border-gray-200 bg-white hover:bg-amber-50/10 transition text-xs sm:text-sm";
-                        
-                        // Cek status apakah ini input baru atau perbaikan data lama
-                        const sudahAdaData = (item.qtyDiterimaToko !== "" && item.qtyDiterimaToko !== undefined);
-                        const nilaiAwalBox = sudahAdaData ? item.qtyDiterimaToko : item.qtyPO;
-                        
-                        const badgeStatus = sudahAdaData 
-                            ? `<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded shadow-sm border border-green-200"><i class="fa-solid fa-check-double"></i> Dikonfirmasi: ${item.qtyDiterimaToko}</span>`
-                            : `<span class="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded shadow-sm border border-amber-200"><i class="fa-solid fa-clock"></i> Belum Diterima</span>`;
+                    
+                    // ✨ PROSES LOGIKA BARU: Kelompokkan array data berdasarkan Tanggal PO
+                    const groupedData = {};
+                    result.data.forEach(item => {
+                        if (!groupedData[item.tanggal]) {
+                            groupedData[item.tanggal] = [];
+                        }
+                        groupedData[item.tanggal].push(item);
+                    });
 
-                        row.innerHTML = `
-                            <td class="p-3 text-center text-gray-500 font-bold">${index + 1}</td>
-                            <td class="p-3">
-                                <div class="text-[10px] text-gray-400 font-mono">${item.tanggal}</div>
-                                <div class="font-semibold text-gray-800 flex items-center flex-wrap">${item.nama} ${badgeStatus}</div>
-                                <div class="text-[10px] text-gray-400 font-mono">Kode: ${item.kode || '-'}</div>
-                            </td>
-                            <td class="p-3 text-center font-bold text-gray-500 bg-gray-100/50">${item.qtyPO}</td>
-                            <td class="p-3 text-center">
-                                <input type="number" data-row="${item.rowNum}" data-name="${item.nama}" min="0" value="${nilaiAwalBox}" class="receipt-qty-input w-20 p-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none font-bold text-amber-600 bg-amber-50/30">
+                    // Ambil daftar tanggal unik yang sudah urut dari yang terbaru
+                    const orderDates = Object.keys(groupedData);
+
+                    // Looping per Kelompok Tanggal
+                    orderDates.forEach(dateGroup => {
+                        
+                        // 1. Buat Baris Pembatas / Header Kelompok PO
+                        const headerRow = document.createElement('tr');
+                        headerRow.className = "bg-indigo-900 text-white font-bold tracking-wide border-t-4 border-indigo-950";
+                        headerRow.innerHTML = `
+                            <td colspan="4" class="p-2.5 text-xs sm:text-sm uppercase">
+                                <i class="fa-solid fa-receipt text-indigo-300 mr-2"></i> KELOMPOK PO TANGGAL: <span class="text-yellow-300">${dateGroup} WIB</span>
                             </td>
                         `;
-                        tbody.appendChild(row);
+                        tbody.appendChild(headerRow);
+
+                        // 2. Tampilkan item-item di dalam kelompok tersebut (Urut sesuai input awal)
+                        // Karena di server di-reverse, di sini kita reverse balik khusus untuk internal grup agar urutan item tetap 1, 2, 3
+                        const itemsInGroup = groupedData[dateGroup].reverse();
+                        
+                        itemsInGroup.forEach((item, localIndex) => {
+                            const row = document.createElement('tr');
+                            row.className = "border-b border-gray-200 bg-white hover:bg-amber-50/20 transition text-xs sm:text-sm";
+                            
+                            const sudahAdaData = (item.qtyDiterimaToko !== "" && item.qtyDiterimaToko !== undefined);
+                            const nilaiAwalBox = sudahAdaData ? item.qtyDiterimaToko : item.qtyPO;
+                            
+                            const badgeStatus = sudahAdaData 
+                                ? `<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded shadow-sm border border-green-200"><i class="fa-solid fa-check-double"></i> Dikonfirmasi: ${item.qtyDiterimaToko}</span>`
+                                : `<span class="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded shadow-sm border border-amber-200"><i class="fa-solid fa-clock"></i> Belum Diterima</span>`;
+
+                            row.innerHTML = `
+                                <td class="p-3 text-center text-gray-400 font-bold bg-gray-50/50">${localIndex + 1}</td>
+                                <td class="p-3">
+                                    <div class="font-semibold text-gray-800 flex items-center flex-wrap">${item.nama} ${badgeStatus}</div>
+                                    <div class="text-[10px] text-gray-400 font-mono">Kode: ${item.kode || '-'}</div>
+                                </td>
+                                <td class="p-3 text-center font-bold text-gray-600 bg-gray-100/30">${item.qtyPO}</td>
+                                <td class="p-3 text-center">
+                                    <input type="number" data-row="${item.rowNum}" data-name="${item.nama}" min="0" value="${nilaiAwalBox}" class="receipt-qty-input w-20 p-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none font-bold text-amber-600 bg-amber-50/30">
+                                </td>
+                            `;
+                            tbody.appendChild(row);
+                        });
                     });
                     
                     btnSubmitReceive.disabled = false;
                     btnSubmitReceive.className = "w-full bg-amber-500 hover:bg-amber-600 text-white p-3.5 rounded-xl font-bold text-base shadow-lg cursor-pointer flex justify-center items-center gap-2 transition duration-200";
                 } else {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400 italic text-xs">Tidak ada riwayat pengiriman barang dalam 7 hari terakhir untuk toko ini.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400 italic text-xs">Tidak ada riwayat pengiriman barang dalam 30 hari terakhir untuk toko ini.</td></tr>`;
                 }
             })
             .catch(err => {
@@ -417,7 +446,6 @@
                 body: JSON.stringify({ action: "submitReceipt", data: confirmationData })
             })
             .then(() => {
-                // ✨ SEKARANG MENAMPILKAN SCREEN STRUK SUKSES PENERIMAAN BUKAN HANYA ALERT BROWSER
                 document.getElementById('tabContentReceive').classList.add('hidden');
                 document.getElementById('successReceiveScreen').classList.remove('hidden');
                 document.getElementById('successRecStore').textContent = store;
