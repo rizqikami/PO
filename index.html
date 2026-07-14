@@ -15,13 +15,13 @@
             <p class="text-blue-100 text-sm mt-1">Ketik dan periksa kembali pesanan toko Anda sebelum dikirim.</p>
         </div>
 
-        <div class="bg-white p-6 rounded-b-2xl shadow-md space-y-6">
+        <div id="mainForm" class="bg-white p-6 rounded-b-2xl shadow-md space-y-6">
             
             <div>
                 <label class="block text-gray-700 font-semibold mb-1 text-sm">
                     <i class="fa-solid fa-store text-blue-500 mr-1"></i> Nama Toko / Outlet <span class="text-red-500">*</span>
                 </label>
-                <select id="storeName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white font-medium text-gray-800">
+                <select id="storeName" onchange="saveDataToStorage()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white font-medium text-gray-800">
                     <option value="" disabled selected>-- Pilih Toko Anda --</option>
                     <option value="Toko Jababeka">Toko Jababeka</option>
                     <option value="Toko Pilar">Toko Pilar</option>
@@ -76,7 +76,8 @@
                     <table class="w-full text-left text-sm text-gray-700">
                         <thead class="bg-gray-200 text-gray-600 text-xs uppercase font-bold">
                             <tr>
-                                <th class="p-3 text-center w-12">No.</th> <th class="p-3">Nama Barang</th>
+                                <th class="p-3 text-center w-12">No.</th>
+                                <th class="p-3">Nama Barang</th>
                                 <th class="p-3 text-center w-20">Qty</th>
                                 <th class="p-3 text-center w-16">Aksi</th>
                             </tr>
@@ -97,6 +98,51 @@
             </div>
 
         </div>
+
+        <div id="successScreen" class="hidden bg-white p-6 rounded-b-2xl shadow-md space-y-6">
+            <div class="text-center space-y-2 py-4">
+                <div class="text-green-500 text-6xl drop-shadow-sm">
+                    <i class="fa-solid fa-circle-check animate-bounce"></i>
+                </div>
+                <h2 class="text-2xl font-black text-gray-800">Pesanan Berhasil Terkirim!</h2>
+                <p class="text-sm text-gray-500 leading-relaxed">Sistem telah berhasil menyimpan laporan pesanan Anda. Berikut rinciannya:</p>
+            </div>
+
+            <div class="bg-green-50/50 p-4 rounded-xl border border-green-100 text-sm space-y-2">
+                <div class="flex justify-between border-b border-green-100 pb-2">
+                    <span class="text-gray-500 font-medium"><i class="fa-solid fa-store text-green-600 mr-1.5"></i>Toko / Outlet:</span>
+                    <span id="successStore" class="font-bold text-gray-800"></span>
+                </div>
+                <div class="flex justify-between pt-1">
+                    <span class="text-gray-500 font-medium"><i class="fa-solid fa-clock text-green-600 mr-1.5"></i>Waktu Kirim:</span>
+                    <span id="successTime" class="font-bold text-gray-800 text-right"></span>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Item Terkirim:</div>
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <table class="w-full text-left text-sm text-gray-700">
+                        <thead class="bg-gray-50 text-gray-600 text-xs uppercase font-bold border-b border-gray-200">
+                            <tr>
+                                <th class="p-3 text-center w-12 bg-gray-100/50">No.</th>
+                                <th class="p-3">Nama Barang</th>
+                                <th class="p-3 text-center w-24 bg-gray-100/50">Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody id="successTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="pt-4">
+                <button onclick="backToInputForm()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-xl font-bold text-base shadow-lg transition duration-200 flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Halaman Input
+                </button>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -116,6 +162,8 @@
                 if (result.status === "success") {
                     allProducts = result.data; 
                     renderProductOptions(allProducts);
+                    // 🛡️ BACA CADANGAN DARI MEMORI HP JIKA ADA
+                    loadDataFromStorage();
                 } else {
                     itemSelect.innerHTML = `<option value="" disabled selected>-- Gagal memuat database --</option>`;
                 }
@@ -177,7 +225,32 @@
             }
         });
 
-        // 🛠️ UPDATE: renderCart sekarang menampilkan nomor urut dan total item badge
+        // 🛡️ LOGIKA BARU: Menyimpan keranjang & toko terpilih ke memori HP (LocalStorage)
+        function saveDataToStorage() {
+            localStorage.setItem('temp_cart', JSON.stringify(cart));
+            localStorage.setItem('temp_store', document.getElementById('storeName').value);
+        }
+
+        // 🛡️ LOGIKA BARU: Membaca cadangan dari memori HP saat halaman dimuat
+        function loadDataFromStorage() {
+            const savedCart = localStorage.getItem('temp_cart');
+            const savedStore = localStorage.getItem('temp_store');
+
+            if (savedCart) {
+                cart = JSON.parse(savedCart);
+                renderCart();
+            }
+            if (savedStore) {
+                document.getElementById('storeName').value = savedStore;
+            }
+        }
+
+        // 🛡️ LOGIKA BARU: Menghapus cadangan setelah pesanan sukses terkirim
+        function clearDataStorage() {
+            localStorage.removeItem('temp_cart');
+            localStorage.removeItem('temp_store');
+        }
+
         function renderCart() {
             const tbody = document.getElementById('cartTableBody');
             const cartCount = document.getElementById('cartCount');
@@ -188,18 +261,18 @@
                     <tr id="emptyRow">
                         <td colspan="4" class="p-4 text-center text-gray-400 italic text-xs">Belum ada barang yang ditambahkan.</td>
                     </tr>`;
-                cartCount.textContent = ''; // Sembunyikan badge jika kosong
+                cartCount.textContent = ''; 
                 return;
             }
 
-            // Tampilkan total jenis barang di pojok kanan atas tabel
             cartCount.textContent = `${cart.length} Item`;
 
             cart.forEach((item, index) => {
                 const row = document.createElement('tr');
                 row.className = "border-b border-gray-200 bg-white hover:bg-gray-50 transition";
                 row.innerHTML = `
-                    <td class="p-3 text-center text-gray-500 font-bold">${index + 1}</td> <td class="p-3 font-medium text-gray-800">${item.name}</td>
+                    <td class="p-3 text-center text-gray-500 font-bold">${index + 1}</td>
+                    <td class="p-3 font-medium text-gray-800">${item.name}</td>
                     <td class="p-3 text-center font-bold text-blue-600">${item.qty}</td>
                     <td class="p-3 text-center">
                         <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700 p-1 transition">
@@ -239,11 +312,68 @@
             document.getElementById('searchItem').value = '';
             renderProductOptions(allProducts); 
             renderCart();
+            
+            // 🛡️ Simpan perubahan ke memori HP
+            saveDataToStorage();
         }
 
         function removeFromCart(index) {
             cart.splice(index, 1);
             renderCart();
+            
+            // 🛡️ Simpan perubahan ke memori HP
+            saveDataToStorage();
+        }
+
+        // FUNGSI UNTUK MENAMPILKAN LAYAR STRUK SUKSES
+        function showSuccessScreen(store, submittedCart) {
+            // Sembunyikan Form Utama, Tampilkan Layar Sukses
+            document.getElementById('mainForm').classList.add('hidden');
+            document.getElementById('successScreen').classList.remove('hidden');
+
+            // Set Data Toko & Waktu
+            document.getElementById('successStore').textContent = store;
+            
+            const now = new Date();
+            const formattedTime = now.toLocaleDateString('id-ID', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            }) + ' - ' + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+            document.getElementById('successTime').textContent = formattedTime;
+
+            // Render daftar item yang sukses terkirim ke dalam tabel struk
+            const successTbody = document.getElementById('successTableBody');
+            successTbody.innerHTML = '';
+
+            submittedCart.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.className = "border-b border-gray-100 bg-white hover:bg-green-50/20 transition";
+                row.innerHTML = `
+                    <td class="p-3 text-center text-gray-400 font-bold bg-gray-50/50">${index + 1}</td>
+                    <td class="p-3 font-semibold text-gray-800">${item.name}</td>
+                    <td class="p-3 text-center font-bold text-green-600">${item.qty} Pcs</td>
+                `;
+                successTbody.appendChild(row);
+            });
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // FUNGSI UNTUK KEMBALI KE HALAMAN INPUT UTAMA
+        function backToInputForm() {
+            // Sembunyikan layar sukses, tampilkan form input lagi
+            document.getElementById('successScreen').classList.add('hidden');
+            document.getElementById('mainForm').classList.remove('hidden');
+
+            // Reset input form agar bersih
+            document.getElementById('searchItem').value = '';
+            document.getElementById('itemQty').value = '';
+            document.getElementById('itemName').selectedIndex = 0;
+            renderProductOptions(allProducts);
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function submitOrder() {
@@ -271,7 +401,13 @@
                 body: JSON.stringify(payload)
             })
             .then(() => {
-                alert('Pesanan sukses terkirim ke Google Sheets Admin!');
+                // Tampilkan ringkasan sukses
+                showSuccessScreen(storeName, [...cart]);
+                
+                // 🛡️ Bersihkan memori HP karena data sudah aman masuk database pusat
+                clearDataStorage();
+                
+                // Baru setelah itu reset variabel lokal
                 cart = [];
                 document.getElementById('storeName').selectedIndex = 0;
                 renderCart();
