@@ -12,15 +12,18 @@
     <div class="max-w-2xl mx-auto px-4 py-8">
         <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-t-2xl shadow-md text-center">
             <h1 class="text-2xl font-bold tracking-wide"><i class="fa-solid fa-boxes-packing mr-2"></i>Sistem Operasional Toko</h1>
-            <p class="text-blue-100 text-sm mt-1">Pemesanan Barang & Konfirmasi Penerimaan Stok Toko</p>
+            <p class="text-blue-100 text-sm mt-1">Alur Lengkap: Pemesanan, Penerimaan Stokis, & Penerimaan Toko</p>
         </div>
 
-        <div class="flex bg-white border-b border-gray-200 p-2 shadow-sm">
-            <button id="btnTabOrder" onclick="switchTab('order')" class="w-1/2 py-3 text-center text-sm font-bold border-b-4 border-blue-600 text-blue-600 transition duration-200">
-                <i class="fa-solid fa-cart-shopping mr-2"></i>1. Buat PO Baru
+        <div class="flex bg-white border-b border-gray-200 p-2 shadow-sm text-xs sm:text-sm">
+            <button id="btnTabOrder" onclick="switchTab('order')" class="w-1/3 py-3 text-center font-bold border-b-4 border-blue-600 text-blue-600 transition duration-200">
+                <i class="fa-solid fa-cart-shopping mr-1 sm:mr-2"></i>1. Buat PO
             </button>
-            <button id="btnTabReceive" onclick="switchTab('receive')" class="w-1/2 py-3 text-center text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-blue-600 transition duration-200">
-                <i class="fa-solid fa-clipboard-check mr-2"></i>2. Terima Barang Toko
+            <button id="btnTabStokis" onclick="switchTab('stokis')" class="w-1/3 py-3 text-center font-bold border-b-4 border-transparent text-gray-500 hover:text-purple-600 transition duration-200">
+                <i class="fa-solid fa-warehouse mr-1 sm:mr-2"></i>2. Terima Stokis
+            </button>
+            <button id="btnTabReceive" onclick="switchTab('receive')" class="w-1/3 py-3 text-center font-bold border-b-4 border-transparent text-gray-500 hover:text-amber-600 transition duration-200">
+                <i class="fa-solid fa-clipboard-check mr-1 sm:mr-2"></i>3. Terima Toko
             </button>
         </div>
 
@@ -83,14 +86,44 @@
             </div>
         </div>
 
+        <div id="tabContentStokis" class="bg-white p-6 rounded-b-2xl shadow-md space-y-6 hidden">
+            <div class="bg-purple-50 border border-purple-200 p-4 rounded-xl text-purple-800 text-xs space-y-2">
+                <p class="font-bold text-sm text-purple-900"><i class="fa-solid fa-circle-info mr-1"></i> Panduan Penerimaan Stokis dari Supplier:</p>
+                <ul class="list-decimal list-inside space-y-1 text-gray-700 leading-relaxed">
+                    <li>Pilih <span class="font-semibold">Nama Toko Tujuan PO</span> lalu klik tombol <span class="bg-purple-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold">Cek Barang</span>.</li>
+                    <li>Daftar kiriman akan muncul otomatis dikelompokkan berdasarkan <span class="font-semibold">Tanggal PO</span>.</li>
+                    <li>Hitung kondisi fisik barang dari Supplier yang diterima di Stokis, lalu ketik kuantitasnya pada kolom <span class="font-semibold text-purple-600">Fisik Stokis</span>.</li>
+                    <li>Klik <span class="font-semibold">Simpan Penerimaan Stokis Tanggal Ini saja</span> untuk mengonfirmasi data ke server.</li>
+                </ul>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1 text-sm"><i class="fa-solid fa-store text-purple-500 mr-1"></i> Nama Toko / Outlet Tujuan <span class="text-red-500">*</span></label>
+                <div class="flex gap-2">
+                    <select id="stokisStoreName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white font-medium text-gray-800 text-sm">
+                        <option value="" disabled selected>-- Pilih Toko --</option>
+                        <option value="Toko Jababeka">Toko Jababeka</option>
+                        <option value="Toko Pilar">Toko Pilar</option>
+                        <option value="Toko Mega Regency">Toko Mega Regency</option>
+                        <option value="Toko Lippo Cikarang">Toko Lippo Cikarang</option>
+                    </select>
+                    <button type="button" onclick="checkIncomingGoodsStokis()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 rounded-lg text-sm font-bold whitespace-nowrap transition duration-200 flex items-center gap-1"><i class="fa-solid fa-magnifying-glass"></i> Cek Barang</button>
+                </div>
+            </div>
+
+            <div id="stokisGroupsContainer" class="space-y-8">
+                <div class="text-center text-gray-400 italic text-xs py-8 border border-dashed border-gray-200 rounded-xl bg-gray-50">Silakan pilih toko tujuan dan tekan tombol "Cek Barang" di atas.</div>
+            </div>
+        </div>
+
         <div id="tabContentReceive" class="bg-white p-6 rounded-b-2xl shadow-md space-y-6 hidden">
-            <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl text-blue-800 text-xs space-y-2">
-                <p class="font-bold text-sm text-blue-900"><i class="fa-solid fa-circle-info mr-1"></i> Panduan Penerimaan Barang Toko:</p>
+            <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-amber-800 text-xs space-y-2">
+                <p class="font-bold text-sm text-amber-900"><i class="fa-solid fa-circle-info mr-1"></i> Panduan Penerimaan Barang Toko:</p>
                 <ul class="list-decimal list-inside space-y-1 text-gray-700 leading-relaxed">
                     <li>Pilih <span class="font-semibold">Nama Toko Anda</span> lalu klik tombol <span class="bg-amber-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold">Cek Barang</span> untuk menarik data.</li>
-                    <li>Daftar kiriman akan muncul otomatis dikelompokkan berdasarkan masing-masing <span class="font-semibold">Tanggal PO</span>.</li>
-                    <li>Hitung kondisi fisik produk yang Anda terima, lalu ketik jumlahnya pada kotak <span class="font-semibold text-amber-600">Fisik Datang</span>.</li>
-                    <li>Klik tombol <span class="font-semibold">Simpan Penerimaan PO Tanggal Ini saja</span> tepat di bawah tabel dokumen tersebut untuk mengonfirmasi data ke sistem.</li>
+                    <li>Sistem otomatis menampilkan jumlah barang yang telah <span class="text-purple-600 font-bold"><i class="fa-solid fa-warehouse"></i> Dikirim oleh Stokis</span>.</li>
+                    <li>Hitung kondisi fisik produk yang mendarat di toko Anda, lalu ketik jumlahnya pada kotak <span class="font-semibold text-amber-600">Fisik Datang</span>.</li>
+                    <li>Klik tombol <span class="font-semibold">Simpan Penerimaan PO Tanggal Ini saja</span> untuk mengonfirmasi data ke sistem.</li>
                 </ul>
             </div>
 
@@ -137,6 +170,30 @@
             <div class="pt-4"><button onclick="backToInputForm('order')" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-xl font-bold text-base shadow-lg transition duration-200"><i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Form Pemesanan</button></div>
         </div>
 
+        <div id="successStokisScreen" class="hidden bg-white p-6 rounded-b-2xl shadow-md space-y-6">
+            <div class="text-center space-y-2 py-4">
+                <div class="text-purple-500 text-6xl"><i class="fa-solid fa-circle-check animate-bounce"></i></div>
+                <h2 class="text-2xl font-black text-gray-800">Stokis Sukses Menerima!</h2>
+                <p class="text-sm text-gray-500">Konfirmasi penerimaan barang dari supplier di Gudang Stokis berhasil disimpan.</p>
+            </div>
+            <div class="bg-purple-50 p-4 rounded-xl border border-purple-100 text-sm space-y-2">
+                <div class="flex justify-between border-b border-purple-100 pb-2"><span class="text-gray-500 font-medium">Toko Tujuan:</span><span id="successStokisStore" class="font-bold text-gray-800"></span></div>
+                <div class="flex justify-between pt-1"><span class="text-gray-500 font-medium">Waktu Update:</span><span id="successStokisTime" class="font-bold text-gray-800"></span></div>
+            </div>
+            <div>
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Item Berhasil Diterima Stokis:</div>
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <table class="w-full text-left text-sm text-gray-700">
+                        <thead class="bg-gray-50 text-gray-600 text-xs uppercase font-bold border-b border-gray-200">
+                            <tr><th class="p-3 text-center w-12">No.</th><th>Nama Barang</th><th class="p-3 text-center w-24">Qty Stokis</th></tr>
+                        </thead>
+                        <tbody id="successStokisTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="pt-4"><button onclick="backToInputForm('stokis')" class="w-full bg-purple-600 hover:bg-purple-700 text-white p-3.5 rounded-xl font-bold text-base shadow-lg transition duration-200"><i class="fa-solid fa-rotate-left mr-1"></i> Kembali ke Menu Stokis</button></div>
+        </div>
+
         <div id="successReceiveScreen" class="hidden bg-white p-6 rounded-b-2xl shadow-md space-y-6">
             <div class="text-center space-y-2 py-4">
                 <div class="text-amber-500 text-6xl"><i class="fa-solid fa-square-check animate-pulse"></i></div>
@@ -148,7 +205,7 @@
                 <div class="flex justify-between pt-1"><span class="text-gray-500 font-medium">Waktu Update:</span><span id="successRecTime" class="font-bold text-gray-800"></span></div>
             </div>
             <div>
-                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Ringkasan Fisik yang Diterima:</div>
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Ringkasan Fisik yang Diterima Toko:</div>
                 <div class="border border-gray-200 rounded-lg overflow-hidden">
                     <table class="w-full text-left text-sm text-gray-700">
                         <thead class="bg-gray-50 text-gray-600 text-xs uppercase font-bold border-b border-gray-200">
@@ -168,12 +225,11 @@
         let allProducts = []; 
         
         // ⚠️ MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI:
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTvrxQ7qhfk0WongSF63969m_yKsrR2UhztymWkwxPmgpIXuH2eitumuYNHPMHYOwM/exec"; 
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpoauA4UkH700HhBmwC8Qpp39fSu3BGr8Y1QmqQiQXhpMuZpdqL4GjlNziObM-ihxz/exec"; 
 
-        // Fungsi bantu: Mengubah ISO String dari server menjadi format lokal HP/PC pengguna secara otomatis
         function formatDateToLocal(dateStr) {
             const d = new Date(dateStr);
-            if (isNaN(d.getTime())) return dateStr; // fallback jika berupa teks biasa
+            if (isNaN(d.getTime())) return dateStr; 
             return d.toLocaleString(undefined, {
                 day: '2-digit',
                 month: '2-digit',
@@ -185,22 +241,34 @@
 
         function switchTab(tabName) {
             const tabOrder = document.getElementById('tabContentOrder');
+            const tabStokis = document.getElementById('tabContentStokis');
             const tabReceive = document.getElementById('tabContentReceive');
+            
             const btnOrder = document.getElementById('btnTabOrder');
+            const btnStokis = document.getElementById('btnTabStokis');
             const btnReceive = document.getElementById('btnTabReceive');
+            
             document.getElementById('successScreen').classList.add('hidden');
+            document.getElementById('successStokisScreen').classList.add('hidden');
             document.getElementById('successReceiveScreen').classList.add('hidden');
+
+            tabOrder.classList.add('hidden');
+            tabStokis.classList.add('hidden');
+            tabReceive.classList.add('hidden');
+
+            btnOrder.className = "w-1/3 py-3 text-center text-xs sm:text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-blue-600 transition";
+            btnStokis.className = "w-1/3 py-3 text-center text-xs sm:text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-purple-600 transition";
+            btnReceive.className = "w-1/3 py-3 text-center text-xs sm:text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-amber-500 transition";
 
             if (tabName === 'order') {
                 tabOrder.classList.remove('hidden');
-                tabReceive.classList.add('hidden');
-                btnOrder.className = "w-1/2 py-3 text-center text-sm font-bold border-b-4 border-blue-600 text-blue-600 transition";
-                btnReceive.className = "w-1/2 py-3 text-center text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-blue-600 transition";
+                btnOrder.className = "w-1/3 py-3 text-center text-xs sm:text-sm font-bold border-b-4 border-blue-600 text-blue-600 transition";
+            } else if (tabName === 'stokis') {
+                tabStokis.classList.remove('hidden');
+                btnStokis.className = "w-1/3 py-3 text-center text-xs sm:text-sm font-bold border-b-4 border-purple-600 text-purple-600 transition";
             } else if (tabName === 'receive') {
-                tabOrder.classList.add('hidden');
                 tabReceive.classList.remove('hidden');
-                btnOrder.className = "w-1/2 py-3 text-center text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-blue-600 transition";
-                btnReceive.className = "w-1/2 py-3 text-center text-sm font-bold border-b-4 border-amber-500 text-amber-500 transition";
+                btnReceive.className = "w-1/3 py-3 text-center text-xs sm:text-sm font-bold border-b-4 border-amber-500 text-amber-500 transition";
             }
         }
 
@@ -297,9 +365,13 @@
 
         function backToInputForm(tabTarget) {
             document.getElementById('successScreen').classList.add('hidden');
+            document.getElementById('successStokisScreen').classList.add('hidden');
             document.getElementById('successReceiveScreen').classList.add('hidden');
             if (tabTarget === 'order') {
                 document.getElementById('tabContentOrder').classList.remove('hidden');
+            } else if (tabTarget === 'stokis') {
+                document.getElementById('tabContentStokis').classList.remove('hidden');
+                checkIncomingGoodsStokis();
             } else {
                 document.getElementById('tabContentReceive').classList.remove('hidden');
                 checkIncomingGoods(); 
@@ -339,6 +411,153 @@
             .finally(() => { btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Kirim Semua Pesanan Sekarang`; });
         }
 
+        // ========================== PROSES TAB 2: TERIMA BARANG STOKIS ==========================
+        function checkIncomingGoodsStokis() {
+            const store = document.getElementById('stokisStoreName').value;
+            if (!store) { alert('Silakan pilih Nama Toko terlebih dahulu!'); return; }
+
+            const container = document.getElementById('stokisGroupsContainer');
+            container.innerHTML = `<div class="text-center text-gray-500 font-medium py-8"><i class="fa-solid fa-spinner animate-spin text-purple-500 mr-2"></i>Memuat data kiriman dari supplier...</div>`;
+
+            fetch(`${APPS_SCRIPT_URL}?action=getReceiptData&toko=${encodeURIComponent(store)}`)
+            .then(response => response.json())
+            .then(result => {
+                container.innerHTML = '';
+                if (result.status === "success" && result.data.length > 0) {
+                    const groupedData = {};
+                    result.data.forEach(item => {
+                        if (!groupedData[item.tanggal]) { groupedData[item.tanggal] = []; }
+                        groupedData[item.tanggal].push(item);
+                    });
+
+                    const orderDates = Object.keys(groupedData);
+
+                    orderDates.forEach((dateGroup, gIndex) => {
+                        const safeDateId = "stokis_group_" + dateGroup.replace(/[^a-zA-Z0-9]/g, "_") + "_" + gIndex;
+                        const itemsInGroup = groupedData[dateGroup].reverse();
+                        const localDateLabel = formatDateToLocal(dateGroup);
+
+                        const cardDiv = document.createElement('div');
+                        cardDiv.id = safeDateId;
+                        cardDiv.className = "bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden space-y-3 pb-4 bg-gray-50/30";
+                        
+                        let tableRowsHtml = '';
+                        itemsInGroup.forEach((item, localIndex) => {
+                            const sudahAdaData = (item.qtyDiterimaStokis !== "" && item.qtyDiterimaStokis !== undefined);
+                            const nilaiAwalBox = sudahAdaData ? item.qtyDiterimaStokis : item.qtyPO;
+                            
+                            const badgeStatus = sudahAdaData 
+                                ? `<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded border border-green-200"><i class="fa-solid fa-check-double"></i> Stokis Ok: ${item.qtyDiterimaStokis}</span>`
+                                : `<span class="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded border border-amber-200"><i class="fa-solid fa-clock"></i> Belum Diterima</span>`;
+
+                            tableRowsHtml += `
+                                <tr class="border-b border-gray-200 bg-white text-xs sm:text-sm">
+                                    <td class="p-3 text-center text-gray-400 font-bold">${localIndex + 1}</td>
+                                    <td class="p-3">
+                                        <div class="font-semibold text-gray-800">${item.nama} ${badgeStatus}</div>
+                                        <div class="text-[10px] text-gray-400 font-mono">Kode: ${item.kode || '-'}</div>
+                                    </td>
+                                    <td class="p-3 text-center font-bold text-gray-500 bg-gray-50">${item.qtyPO}</td>
+                                    <td class="p-3 text-center">
+                                        <input type="number" data-row="${item.rowNum}" data-name="${item.nama}" min="0" value="${nilaiAwalBox}" class="stokis-input-${safeDateId} w-20 p-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none font-bold text-purple-600 bg-purple-50/20">
+                                    </td>
+                                </tr>
+                            `;
+                        });
+
+                        cardDiv.innerHTML = `
+                            <div class="bg-purple-900 text-white font-bold p-3 text-xs sm:text-sm uppercase flex justify-between items-center tracking-wide">
+                                <span><i class="fa-solid fa-warehouse text-purple-300 mr-2"></i> PO: ${localDateLabel}</span>
+                                <span class="bg-purple-800 px-2 py-0.5 rounded text-[10px] border border-purple-700">${itemsInGroup.length} Item</span>
+                            </div>
+                            <div class="px-3 overflow-x-auto">
+                                <table class="w-full text-left border border-gray-200 rounded-lg overflow-hidden min-w-[480px]">
+                                    <thead class="bg-gray-100 text-gray-600 text-[11px] uppercase font-bold border-b border-gray-200">
+                                        <tr><th class="p-2 text-center w-12">No</th><th class="p-2">Detail Barang</th><th class="p-2 text-center w-20">Qty PO</th><th class="p-2 text-center w-28">Fisik Stokis</th></tr>
+                                    </thead>
+                                    <tbody>${tableRowsHtml}</tbody>
+                                </table>
+                            </div>
+                            <div class="px-3 pt-2">
+                                <button id="btnSubmit-${safeDateId}" onclick="submitSingleGroupStokisReceipt('${safeDateId}', '${localDateLabel}')" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow transition flex justify-center items-center gap-1">
+                                    <i class="fa-solid fa-circle-check"></i> Simpan Penerimaan Stokis Tanggal Ini saja
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(cardDiv);
+                    });
+                } else {
+                    container.innerHTML = `<div class="text-center text-gray-400 italic text-xs py-8">Tidak ada riwayat pengiriman barang dalam 30 hari terakhir untuk toko ini.</div>`;
+                }
+            })
+            .catch(err => {
+                container.innerHTML = `<div class="text-center text-red-500 italic text-xs py-8">Gagal memuat data. Periksa koneksi internet Anda!</div>`;
+            });
+        }
+
+        function submitSingleGroupStokisReceipt(safeDateId, dateGroupLabel) {
+            const inputs = document.querySelectorAll(`.stokis-input-${safeDateId}`);
+            if (inputs.length === 0) return;
+
+            const confirmationData = [];
+            const summaryArray = [];
+            let isValid = true;
+
+            inputs.forEach(input => {
+                const rowNum = input.getAttribute('data-row');
+                const itemName = input.getAttribute('data-name');
+                const qtyVal = input.value.trim();
+
+                if (qtyVal === "" || isNaN(qtyVal) || Number(qtyVal) < 0) {
+                    isValid = false;
+                } else {
+                    confirmationData.push({ rowNum: Number(rowNum), nama: itemName, qtyDiterima: Number(qtyVal) });
+                    summaryArray.push({ name: itemName, qty: qtyVal });
+                }
+            });
+
+            if (!isValid) { alert('Kuantitas fisik tidak boleh kosong atau bernilai negatif!'); return; }
+            if (!confirm(`Apakah Anda yakin kuantitas fisik masuk di Stokis untuk PO tanggal ${dateGroupLabel} sudah dihitung dengan benar?`)) return;
+
+            const btn = document.getElementById(`btnSubmit-${safeDateId}`);
+            const store = document.getElementById('stokisStoreName').value;
+            
+            btn.disabled = true; 
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Memperbarui Server...`;
+
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ action: "submitStokisReceipt", toko: store, data: confirmationData })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.status === "success") {
+                    document.getElementById('tabContentStokis').classList.add('hidden');
+                    document.getElementById('successStokisScreen').classList.remove('hidden');
+                    document.getElementById('successStokisStore').textContent = store;
+                    document.getElementById('successStokisTime').textContent = formatDateToLocal(new Date().toISOString());
+                    
+                    const recTbody = document.getElementById('successStokisTableBody');
+                    recTbody.innerHTML = '';
+                    summaryArray.forEach((item, index) => {
+                        recTbody.innerHTML += `<tr><td class="p-3 text-center text-gray-400 font-bold">${index+1}</td><td class="p-3 font-semibold text-gray-800">${item.name}</td><td class="p-3 text-center font-bold text-purple-600">${item.qty} Pcs</td></tr>`;
+                    });
+                } else {
+                    alert("⚠️ KOREKSI DI TOLAK SERVER:\n\n" + result.message);
+                    checkIncomingGoodsStokis(); 
+                }
+            })
+            .catch(err => { 
+                alert('Koneksi internet terputus atau server tidak merespon.'); 
+            })
+            .finally(() => { 
+                btn.disabled = false; 
+                btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Simpan Penerimaan Stokis Tanggal Ini saja`; 
+            });
+        }
+
+        // ========================== PROSES TAB 3: TERIMA BARANG TOKO ==========================
         function checkIncomingGoods() {
             const store = document.getElementById('receiveStoreName').value;
             if (!store) { alert('Silakan pilih Nama Toko Anda!'); return; }
@@ -351,7 +570,6 @@
             .then(result => {
                 container.innerHTML = '';
                 if (result.status === "success" && result.data.length > 0) {
-                    
                     const groupedData = {};
                     result.data.forEach(item => {
                         if (!groupedData[item.tanggal]) { groupedData[item.tanggal] = []; }
@@ -363,8 +581,6 @@
                     orderDates.forEach((dateGroup, gIndex) => {
                         const safeDateId = "group_" + dateGroup.replace(/[^a-zA-Z0-9]/g, "_") + "_" + gIndex;
                         const itemsInGroup = groupedData[dateGroup].reverse();
-
-                        // Konversi Tanggal PO (ISO String) ke format lokal bawaan perangkat pengguna
                         const localDateLabel = formatDateToLocal(dateGroup);
 
                         const cardDiv = document.createElement('div');
@@ -374,11 +590,18 @@
                         let tableRowsHtml = '';
                         itemsInGroup.forEach((item, localIndex) => {
                             const sudahAdaData = (item.qtyDiterimaToko !== "" && item.qtyDiterimaToko !== undefined);
-                            const nilaiAwalBox = sudahAdaData ? item.qtyDiterimaToko : item.qtyPO;
+                            const sudahAdaStokis = (item.qtyDiterimaStokis !== "" && item.qtyDiterimaStokis !== undefined);
+                            
+                            // Auto-set nilai awal input ke data Stokis jika ada, jika tidak ada, gunakan Qty PO awal
+                            const nilaiAwalBox = sudahAdaData ? item.qtyDiterimaToko : (sudahAdaStokis ? item.qtyDiterimaStokis : item.qtyPO);
                             
                             const badgeStatus = sudahAdaData 
-                                ? `<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded border border-green-200"><i class="fa-solid fa-check-double"></i> Dikonfirmasi: ${item.qtyDiterimaToko}</span>`
+                                ? `<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded border border-green-200"><i class="fa-solid fa-check-double"></i> Diterima Toko: ${item.qtyDiterimaToko}</span>`
                                 : `<span class="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded border border-amber-200"><i class="fa-solid fa-clock"></i> Belum Diterima</span>`;
+
+                            const infoPenerimaanStokis = sudahAdaStokis
+                                ? `<div class="text-[11px] text-purple-600 font-semibold mt-1"><i class="fa-solid fa-warehouse"></i> Dikirim Stokis: ${item.qtyDiterimaStokis} Pcs</div>`
+                                : `<div class="text-[11px] text-gray-400 italic mt-1"><i class="fa-solid fa-warehouse"></i> Belum dikonfirmasi Stokis</div>`;
 
                             tableRowsHtml += `
                                 <tr class="border-b border-gray-200 bg-white text-xs sm:text-sm">
@@ -386,6 +609,7 @@
                                     <td class="p-3">
                                         <div class="font-semibold text-gray-800">${item.nama} ${badgeStatus}</div>
                                         <div class="text-[10px] text-gray-400 font-mono">Kode: ${item.kode || '-'}</div>
+                                        ${infoPenerimaanStokis}
                                     </td>
                                     <td class="p-3 text-center font-bold text-gray-500 bg-gray-50">${item.qtyPO}</td>
                                     <td class="p-3 text-center">
