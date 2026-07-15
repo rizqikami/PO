@@ -471,7 +471,8 @@
                         itemKeys.forEach((itemName, itemIdx) => {
                             const item = aggregatedItems[itemName];
                             const sudahAdaData = item.isFilledCount > 0;
-                            const nilaiAwalBox = sudahAdaData ? item.totalQtyDiterimaStokis : item.totalQtyPO;
+                            // Jika belum ada data dari server, kotak input otomatis terisi 0
+                            const nilaiAwalBox = sudahAdaData ? item.totalQtyDiterimaStokis : 0;
                             
                             let badgeStatus = `<span class="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded border border-amber-200"><i class="fa-solid fa-clock"></i> Belum Masuk</span>`;
                             if (item.isFilledCount === item.rows.length) {
@@ -626,10 +627,9 @@
                         let tableRowsHtml = '';
                         itemsInGroup.forEach((item, localIndex) => {
                             const sudahAdaData = (item.qtyDiterimaToko !== "" && item.qtyDiterimaToko !== undefined);
-                            const sudahAdaStokis = (item.qtyDiterimaStokis !== "" && item.qtyDiterimaStokis !== undefined);
-                            
-                            // Set cerdas: gunakan data dari fisik stokis jika belum ada konfirmasi toko
-                            const nilaiAwalBox = sudahAdaData ? item.qtyDiterimaToko : (sudahAdaStokis ? item.qtyDiterimaStokis : item.qtyPO);
+
+                            // Default kotak input langsung mengacu ke kuantitas PO asli (bukan alokasi stokis)
+                            const nilaiAwalBox = sudahAdaData ? item.qtyDiterimaToko : item.qtyPO;
                             
                             const badgeStatus = sudahAdaData 
                                 ? `<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded border border-green-200"><i class="fa-solid fa-check-double"></i> Diterima Toko: ${item.qtyDiterimaToko}</span>`
