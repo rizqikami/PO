@@ -302,9 +302,10 @@
         function filterProducts() {
             const query = document.getElementById('searchItem').value.trim();
             if (!query) { renderProductOptions(allProducts); return; }
-            let regexRule = query.includes('%') ? "^" + query.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/%/g, ".*") + "$" : ".*" + query.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1") + ".*";
+            let regexRule = query.includes('%') ? "^" + query.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/%/g, ".*") : "";
             const regex = new RegExp(regexRule, "i");
             const filtered = allProducts.filter(p => regex.test(p.nama) || regex.test(p.kode));
+
             renderProductOptions(filtered);
         }
 
