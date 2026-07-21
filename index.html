@@ -48,7 +48,7 @@
                 <div>
                     <label class="block text-gray-600 text-xs font-medium mb-1">Cari Nama / Kode Barang (Mendukung Wildcard %)</label>
                     <div class="relative">
-                        <input type="text" id="searchItem" oninput="filterProducts()" placeholder="Contoh: Aice% atau %Slush" class="w-full p-2.5 pl-9 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm text-gray-700">
+                        <input type="text" id="searchItem" oninput="filterProducts()" onkeyup="filterProducts()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Contoh: kimbo%n%400" class="w-full p-2.5 pl-9 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm text-gray-700">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-sm"><i class="fa-solid fa-magnifying-glass"></i></div>
                     </div>
                 </div>
@@ -299,11 +299,24 @@
             });
         }
 
+        // ========================== 🔍 FUNGSI PENCARIAN WILDCARD MULTI-% ==========================
         function filterProducts() {
             const query = document.getElementById('searchItem').value.trim();
-            if (!query) { renderProductOptions(allProducts); return; }
-            let regexRule = query.includes('%') ? "^" + query.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/%/g, ".*") : "";
-            const regex = new RegExp(regexRule, "i");
+            if (!query) { 
+                renderProductOptions(allProducts); 
+                return; 
+            }
+
+            // Amankan karakter khusus regex selain %
+            const escaped = query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            
+            // Ubah SEMUA % menjadi .* (Pencocok kata/spasi dinamis)
+            const pattern = escaped.replace(/%/g, ".*");
+            
+            // Regex case-insensitive
+            const regex = new RegExp(pattern, "i");
+
+            // Filter data produk
             const filtered = allProducts.filter(p => regex.test(p.nama) || regex.test(p.kode));
 
             renderProductOptions(filtered);
@@ -417,7 +430,6 @@
                 container.innerHTML = '';
                 if (result.status === "success" && result.data.length > 0) {
 
-                    // 1. Grouping berdasarkan Nama Supplier
                     const supplierGroups = {};
                     result.data.forEach(row => {
                         const supName = row.namaSupplier || "Tanpa Supplier";
@@ -431,7 +443,6 @@
                         const safeSupplierId = "sup_" + supplierName.replace(/[^a-zA-Z0-9]/g, "_") + "_" + sIndex;
                         const rowsOfSupplier = supplierGroups[supplierName];
 
-                        // 2. Agregasi/Penjumlahan item barang yang sama dari seluruh outlet
                         const aggregatedItems = {};
                         rowsOfSupplier.forEach(row => {
                             if (!aggregatedItems[row.nama]) {
@@ -449,11 +460,9 @@
                                 aggregatedItems[row.nama].totalQtyDiterimaStokis += Number(row.qtyDiterimaStokis);
                                 aggregatedItems[row.nama].isFilledCount++;
                             }
-                            // Catat row asli untuk didistribusikan di backend nanti
                             aggregatedItems[row.nama].rows.push({ rowNum: row.rowNum, qtyPO: Number(row.qtyPO) });
                         });
 
-                        // Simpan ke cache global agar aman diakses saat klik submit
                         window.stokisCache[safeSupplierId] = aggregatedItems;
 
                         const cardDiv = document.createElement('div');
@@ -465,8 +474,6 @@
                         itemKeys.forEach((itemName, itemIdx) => {
                             const item = aggregatedItems[itemName];
                             const sudahAdaData = item.isFilledCount > 0;
-                            
-                            // BARU: Jika belum ada data dari server, kotak input otomatis terisi 0
                             const nilaiAwalBox = sudahAdaData ? item.totalQtyDiterimaStokis : 0;
 
                             let badgeStatus = `<span class="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded border border-amber-200"><i class="fa-solid fa-clock"></i> Belum Masuk</span>`;
@@ -624,7 +631,6 @@
                             const sudahAdaData = (item.qtyDiterimaToko !== "" && item.qtyDiterimaToko !== undefined);
                             const sudahAdaStokis = (item.qtyDiterimaStokis !== "" && item.qtyDiterimaStokis !== undefined);
 
-                            // BARU: Default langsung mengacu ke kuantitas PO asli (bukan alokasi/fisik stokis)
                             const nilaiAwalBox = sudahAdaData ? item.qtyDiterimaToko : item.qtyPO;
 
                             const badgeStatus = sudahAdaData
